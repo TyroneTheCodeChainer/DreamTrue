@@ -5,6 +5,12 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontSize: {
+        'body': ['1.125rem', { lineHeight: '1.75' }], // 18px for comfortable reading
+        'body-sm': ['1rem', { lineHeight: '1.6' }], // 16px for secondary text
+        'display': ['2rem', { lineHeight: '1.25' }], // 32px for headlines
+        'display-lg': ['2.5rem', { lineHeight: '1.2' }], // 40px for hero
+      },
       borderRadius: {
         lg: ".5625rem", /* 9px */
         md: ".375rem", /* 6px */
