@@ -44,27 +44,32 @@ export default function Dreams() {
   );
 
   return (
-    <div className="min-h-screen pb-20 pt-4">
-      <div className="px-4 space-y-4">
+    <div className="min-h-screen pb-20 pt-6">
+      <div className="px-6 space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">My Dreams</h1>
+          <div>
+            <h1 className="text-display font-bold">My Dreams</h1>
+            <p className="text-body-sm text-muted-foreground mt-1">
+              {dreams.length} {dreams.length === 1 ? 'dream' : 'dreams'} recorded
+            </p>
+          </div>
           <Button
             size="icon"
             onClick={() => setLocation("/")}
             data-testid="button-add-dream"
-            className="rounded-full bg-gradient-to-r from-primary to-[#764ba2]"
+            className="rounded-full w-12 h-12 bg-gradient-to-r from-primary to-[#764ba2]"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-6 h-6" />
           </Button>
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
             placeholder="Search your dreams..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-12 h-12 text-body-sm"
             data-testid="input-search"
           />
         </div>
@@ -72,7 +77,7 @@ export default function Dreams() {
         {filteredDreams.length === 0 ? (
           <EmptyState type="dreams" onAction={() => setLocation("/")} />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {filteredDreams.map((dream) => (
               <DreamCard
                 key={dream.id}

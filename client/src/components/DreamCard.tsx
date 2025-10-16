@@ -19,34 +19,34 @@ export default function DreamCard({
   onClick,
 }: DreamCardProps) {
   const getConfidenceColor = (score: number) => {
-    if (score >= 80) return "bg-chart-3";
-    if (score >= 50) return "bg-chart-4";
-    return "bg-destructive";
+    if (score >= 80) return "border-l-chart-3";
+    if (score >= 50) return "border-l-chart-4";
+    return "border-l-destructive";
   };
 
   return (
     <Card
       onClick={onClick}
       data-testid="dream-card"
-      className={`p-4 cursor-pointer hover-elevate active-elevate-2 border-l-4 ${getConfidenceColor(
+      className={`p-5 cursor-pointer hover-elevate active-elevate-2 border-l-4 ${getConfidenceColor(
         confidence
       )}`}
     >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Moon className="w-4 h-4" />
-          <span className="text-xs flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Moon className="w-5 h-5" />
+          <span className="text-sm flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
             {date}
           </span>
         </div>
-        <Badge variant="secondary" className="text-xs">
+        <Badge variant="secondary" className="text-sm py-1 px-3">
           {confidence}%
         </Badge>
       </div>
-      <p className="text-sm line-clamp-2 mb-2">{text}</p>
+      <p className="text-body-sm line-clamp-2 mb-2 leading-relaxed">{text}</p>
       {interpretation && (
-        <p className="text-xs text-muted-foreground line-clamp-2 italic">
+        <p className="text-sm text-muted-foreground line-clamp-2 italic leading-relaxed">
           {interpretation}
         </p>
       )}

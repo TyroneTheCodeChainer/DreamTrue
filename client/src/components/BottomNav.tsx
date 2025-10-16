@@ -13,14 +13,14 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-card-border safe-area-inset-bottom">
-      <div className="flex justify-around items-center h-16 max-w-7xl mx-auto px-2">
+      <div className="flex justify-around items-center h-20 max-w-7xl mx-auto px-2">
         {tabs.map(({ icon: Icon, label, path }) => {
           const isActive = location === path;
           return (
             <Link key={path} href={path}>
               <button
                 data-testid={`nav-${label.toLowerCase()}`}
-                className={`flex flex-col items-center justify-center w-16 h-12 rounded-lg transition-colors ${
+                className={`flex flex-col items-center justify-center min-w-[48px] min-h-[48px] rounded-lg transition-colors ${
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground hover-elevate"

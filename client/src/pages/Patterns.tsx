@@ -27,18 +27,23 @@ export default function Patterns() {
 
   if (!hasData) {
     return (
-      <div className="min-h-screen pb-20 pt-4">
+      <div className="min-h-screen pb-20 pt-6">
         <EmptyState type="patterns" onAction={() => setLocation("/")} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-20 pt-4">
-      <div className="px-4 space-y-6">
-        <h1 className="text-2xl font-bold">Dream Patterns</h1>
+    <div className="min-h-screen pb-20 pt-6">
+      <div className="px-6 space-y-6">
+        <div>
+          <h1 className="text-display font-bold">Dream Patterns</h1>
+          <p className="text-body-sm text-muted-foreground mt-1">
+            Discover themes in your subconscious
+          </p>
+        </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <StatsCard
             icon={Moon}
             value={stats.totalDreams}
@@ -64,41 +69,41 @@ export default function Patterns() {
         </div>
 
         <Card className="p-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <Star className="w-5 h-5 text-primary" />
+          <h3 className="text-display font-semibold mb-4 flex items-center gap-2">
+            <Star className="w-6 h-6 text-primary" />
             Most Common Symbols
           </h3>
           <div className="space-y-3">
             {topSymbols.map((symbol) => (
               <div
                 key={symbol.name}
-                className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                className="flex items-center justify-between p-4 bg-muted rounded-lg hover-elevate"
               >
-                <span className="capitalize font-medium">
+                <span className="capitalize font-medium text-body-sm">
                   {symbol.name.replace("_", " ")}
                 </span>
-                <Badge variant="secondary">{symbol.count}x</Badge>
+                <Badge variant="secondary" className="text-sm py-1 px-3">{symbol.count}x</Badge>
               </div>
             ))}
           </div>
         </Card>
 
         <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-primary" />
-            AI Insights
+          <h3 className="text-display font-semibold mb-4 flex items-center gap-2">
+            <Lightbulb className="w-6 h-6 text-primary" />
+            Gentle Insights
           </h3>
-          <div className="space-y-3">
-            <p className="text-sm text-foreground/80">
+          <div className="space-y-4">
+            <p className="text-body-sm leading-relaxed text-foreground/90">
               You frequently dream about <strong>flying</strong>, which often
               indicates a desire for freedom or escape from daily pressures.
             </p>
-            <p className="text-sm text-foreground/80">
+            <p className="text-body-sm leading-relaxed text-foreground/90">
               Your average confidence score of <strong>78%</strong> suggests
               clear symbolic patterns in your dreams.
             </p>
-            <p className="text-sm text-foreground/80">
-              Consider keeping track of your emotional state before sleep to
+            <p className="text-body-sm leading-relaxed text-foreground/90">
+              💡 Try journaling your emotional state before sleep to
               discover deeper connections.
             </p>
           </div>

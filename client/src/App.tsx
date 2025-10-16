@@ -10,6 +10,8 @@ import Patterns from "@/pages/Patterns";
 import Settings from "@/pages/Settings";
 import BottomNav from "@/components/BottomNav";
 import NotFound from "@/pages/not-found";
+import { useEffect } from "react";
+import { initializeTheme } from "@/lib/theme";
 
 function Router() {
   return (
@@ -28,6 +30,10 @@ function Router() {
 }
 
 export default function App() {
+  useEffect(() => {
+    initializeTheme();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
