@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Mic, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import DreamInput from "@/components/DreamInput";
+import { Textarea } from "@/components/ui/textarea";
 import SystemToggle from "@/components/SystemToggle";
 import ContextChips from "@/components/ContextChips";
 import VoiceInput from "@/components/VoiceInput";
@@ -42,60 +42,110 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-20">
-      <div className="relative h-[40vh] overflow-hidden">
+      <div className="relative h-[35vh] overflow-hidden">
         <img
           src={heroImage}
           alt="Night sky"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
-        <div className="absolute inset-0 flex items-center justify-center text-center px-4">
+        <div className="absolute inset-0 flex items-center justify-center text-center px-6">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-3 drop-shadow-lg">
-              Understand Your Dreams
+            <h1 className="text-display-lg font-bold text-white mb-2 drop-shadow-lg">
+              Your Dreams Matter
             </h1>
-            <p className="text-white/90 text-lg drop-shadow">
-              AI-powered analysis with scientific insights
+            <p className="text-white/90 text-body drop-shadow">
+              Gentle AI analysis with scientific insights
             </p>
           </div>
         </div>
       </div>
 
-      <div className="px-4 -mt-8 relative z-10">
-        <div className="bg-card border border-card-border rounded-2xl p-6 shadow-xl space-y-4">
-          <DreamInput
-            value={dreamText}
-            onChange={setDreamText}
-            onVoiceInput={() => setShowVoice(true)}
-            onSubmit={handleSubmit}
-          />
-          
-          <ContextChips selected={context} onSelect={handleContextSelect} />
-          
-          <div>
-            <label className="text-sm font-medium mb-2 block">Analysis Type</label>
-            <SystemToggle value={system} onChange={setSystem} />
-            <p className="text-xs text-muted-foreground mt-2">
-              {system === "rag"
-                ? "Fast interpretation (~10 seconds)"
-                : "Comprehensive multi-agent analysis (~40 seconds)"}
+      <div className="px-6 -mt-8 relative z-10">
+        <div className="bg-card border border-card-border rounded-2xl p-6 shadow-xl space-y-6">
+          {/* Privacy & Reassurance */}
+          <div className="text-center space-y-1">
+            <p className="text-body-sm text-muted-foreground">
+              🔒 Your dreams are private and stored locally
             </p>
+            <p className="text-sm text-muted-foreground/80">
+              Take your time, every dream is valid
+            </p>
+          </div>
+
+          {/* Primary Voice Capture */}
+          <div className="space-y-3">
+            <Button
+              size="lg"
+              onClick={() => setShowVoice(true)}
+              data-testid="button-voice-primary"
+              className="w-full h-14 bg-gradient-to-r from-primary to-[#764ba2] hover:opacity-90 text-body"
+            >
+              <Mic className="w-6 h-6 mr-3" />
+              Quick Voice Capture
+            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              Recommended for groggy minds
+            </p>
+          </div>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or type it out</span>
+            </div>
+          </div>
+
+          {/* Text Input - Secondary Option */}
+          <div className="space-y-4">
+            <Textarea
+              value={dreamText}
+              onChange={(e) => setDreamText(e.target.value)}
+              placeholder="Describe your dream... Include symbols, emotions, and significant events."
+              className="min-h-[100px] text-body resize-none"
+              data-testid="input-dream"
+            />
+            
+            <ContextChips selected={context} onSelect={handleContextSelect} />
+            
+            <div>
+              <label className="text-body-sm font-medium mb-3 block">Analysis Type</label>
+              <SystemToggle value={system} onChange={setSystem} />
+              <p className="text-sm text-muted-foreground mt-2">
+                {system === "rag"
+                  ? "Fast interpretation (~10 seconds)"
+                  : "Comprehensive multi-agent analysis (~40 seconds)"}
+              </p>
+            </div>
+
+            <Button
+              onClick={handleSubmit}
+              disabled={!dreamText.trim()}
+              data-testid="button-analyze"
+              className="w-full h-12 bg-gradient-to-r from-primary to-[#764ba2] hover:opacity-90"
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Analyze Dream
+            </Button>
           </div>
         </div>
 
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Recent Dreams</h2>
+            <h2 className="text-display font-semibold">Recent Dreams</h2>
             <Button
               variant="ghost"
-              size="sm"
+              className="h-12 px-4"
               onClick={() => setLocation("/dreams")}
               data-testid="button-view-all"
             >
               View All
             </Button>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {recentDreams.map((dream) => (
               <DreamCard
                 key={dream.id}
