@@ -262,9 +262,32 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
      *   - Single-turn conversation (no chat history needed)
      *   - Each interpretation is independent (stateless)
      */
+    /**
+     * Token Allocation Strategy
+     * 
+     * Quick Insight: 1600 max_tokens
+     * - Handles dreams up to 3500 chars (~875 tokens input)
+     * - System prompt: ~300 tokens
+     * - User prompt template: ~100 tokens
+     * - Total input: ~1275 tokens
+     * - Response: 1600 tokens (ample headroom for complete JSON)
+     * - Safety margin: ~325 tokens buffer prevents truncation
+     * 
+     * Deep Dive: 2000 max_tokens
+     * - More comprehensive analysis
+     * - Multi-perspective insights
+     * - Longer interpretation text
+     * - Handles even larger inputs comfortably
+     * 
+     * Why these values?
+     * - Must be large enough for complete JSON response
+     * - Truncated JSON breaks parsing (no closing })
+     * - Trade-off: Cost vs. Quality
+     * - Conservative limits prevent any truncation risk
+     */
     const message = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
-      max_tokens: analysisType === 'deep_dive' ? 2000 : 1000,
+      max_tokens: analysisType === 'deep_dive' ? 2000 : 1600,
       temperature: 0.7,
       system: systemPrompt,
       messages: [

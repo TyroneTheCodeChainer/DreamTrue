@@ -111,11 +111,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       /**
        * Input Validation: Dream Text Length
        * 
-       * Why 10 character minimum?
+       * Minimum Length (10 chars):
        * - Too short: Can't extract meaningful symbols/themes
        * - AI struggles with context from very brief input
        * - Prevents spam/abuse (empty or "test" submissions)
        * - 10 chars allows "I was flying" (minimal valid dream)
+       * 
+       * Maximum Length (3500 chars):
+       * - Conservative limit ensures sufficient response token budget
+       * - Token math (Quick Insight with 1600 max_tokens):
+       *   • 3500 chars ≈ 875 tokens (dream text)
+       *   • System prompt ≈ 300 tokens
+       *   • User prompt ≈ 100 tokens
+       *   • Total input ≈ 1275 tokens
+       *   • Response budget: 1600 max_tokens (plenty of headroom)
+       *   • Safety margin: ~325 tokens buffer
+       * - Deep Dive: 2000 max_tokens handles even larger inputs comfortably
+       * - Protects against abuse (extremely long inputs waste API credits)
+       * - Average dream description: 200-800 characters
+       * - 3500 chars = ~700 words (very detailed dream description)
        * 
        * Validation Strategy:
        * - Check both null/undefined AND empty string
@@ -125,6 +139,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
        */
       if (!dreamText || dreamText.trim().length < 10) {
         return res.status(400).json({ message: "Dream text must be at least 10 characters" });
+      }
+      
+      if (dreamText.trim().length > 3500) {
+        return res.status(400).json({ 
+          message: "Dream text is too long. Please keep it under 3500 characters for best results."
+        });
       }
 
       /**
