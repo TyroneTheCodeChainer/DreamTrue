@@ -33,69 +33,113 @@ export const haptics = {
 // Gentle sound effects using Web Audio API
 class SoundEffects {
   private audioContext: AudioContext | null = null;
+  private isSupported = false;
 
-  private getContext() {
-    if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  constructor() {
+    // Check for Web Audio API support
+    this.isSupported = !!(window.AudioContext || (window as any).webkitAudioContext);
+  }
+
+  private async getContext() {
+    if (!this.isSupported) {
+      return null;
     }
+
+    if (!this.audioContext) {
+      try {
+        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      } catch (error) {
+        console.warn('Web Audio API not supported:', error);
+        this.isSupported = false;
+        return null;
+      }
+    }
+
+    // Resume context if suspended (required for iOS)
+    if (this.audioContext.state === 'suspended') {
+      try {
+        await this.audioContext.resume();
+      } catch (error) {
+        console.warn('Could not resume audio context:', error);
+      }
+    }
+
     return this.audioContext;
   }
 
   // Soft chime for recording start
-  playRecordStart() {
-    const ctx = this.getContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+  async playRecordStart() {
+    const ctx = await this.getContext();
+    if (!ctx) return;
 
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    try {
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
 
-    oscillator.frequency.value = 523.25; // C5 note
-    oscillator.type = 'sine';
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
 
-    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      oscillator.frequency.value = 523.25; // C5 note
+      oscillator.type = 'sine';
 
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.3);
+    } catch (error) {
+      console.warn('Could not play sound:', error);
+    }
   }
 
   // Gentle completion sound
-  playComplete() {
-    const ctx = this.getContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+  async playComplete() {
+    const ctx = await this.getContext();
+    if (!ctx) return;
 
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    try {
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
 
-    oscillator.frequency.value = 659.25; // E5 note
-    oscillator.type = 'sine';
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
 
-    gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      oscillator.frequency.value = 659.25; // E5 note
+      oscillator.type = 'sine';
 
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.5);
+      gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.5);
+    } catch (error) {
+      console.warn('Could not play sound:', error);
+    }
   }
 
   // Soft breathing bell
-  playBreathingBell() {
-    const ctx = this.getContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+  async playBreathingBell() {
+    const ctx = await this.getContext();
+    if (!ctx) return;
 
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    try {
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
 
-    oscillator.frequency.value = 440; // A4 note
-    oscillator.type = 'sine';
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
 
-    gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1);
+      oscillator.frequency.value = 440; // A4 note
+      oscillator.type = 'sine';
 
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 1);
+      gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 1);
+    } catch (error) {
+      console.warn('Could not play sound:', error);
+    }
   }
 }
 
