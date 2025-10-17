@@ -310,7 +310,7 @@
       -140px 440px 0 0.8px rgba(255,255,255,0.6),
       380px -340px 0 0.8px rgba(230,240,255,0.65);
     animation: twinkle 4s ease-in-out infinite;
-    filter: blur(0.4px);
+    filter: blur(0.8px);
   }
   
   /* Additional layer for density and depth - MANY MORE STARS */
@@ -396,14 +396,31 @@
       510px -350px 0 0.8px rgba(230,240,255,0.55),
       -50px 150px 0 0.8px rgba(255,255,255,0.6),
       150px -70px 0 0.8px rgba(235,242,255,0.55);
-    animation: twinkle 5s ease-in-out infinite reverse;
-    filter: blur(0.4px);
+    animation: twinkle-slow 5s ease-in-out infinite reverse;
+    filter: blur(0.8px);
   }
 
-  /* Gentle celestial twinkling animation */
+  /* Smooth organic celestial twinkling animation */
   @keyframes twinkle {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    0%, 100% { 
+      opacity: 1; 
+      transform: scale(1);
+    }
+    50% { 
+      opacity: 0.4; 
+      transform: scale(0.95);
+    }
+  }
+
+  @keyframes twinkle-slow {
+    0%, 100% { 
+      opacity: 1; 
+      transform: scale(1);
+    }
+    50% { 
+      opacity: 0.5; 
+      transform: scale(0.97);
+    }
   }
 
   /* Ensure content is above stars */
