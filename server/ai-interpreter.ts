@@ -316,12 +316,114 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
     }
 
     /**
-     * JSON Parsing with Validation
+     * JSON Parsing with Validation & Control Character Sanitization
      * 
      * Parse the extracted JSON string into an object.
      * JavaScript's JSON.parse throws SyntaxError if invalid.
+     * 
+     * BUG FIX: Sanitize JSON string before parsing to handle control characters
+     * Claude sometimes returns text with unescaped control characters inside string values.
+     * 
+     * Example problem:
+     *   { "interpretation": "Line 1\nLine 2" }  ← Literal newline in string breaks JSON
+     * 
+     * Solution: Smart sanitization that only escapes chars inside quoted strings
      */
-    const parsed = JSON.parse(jsonMatch[0]);
+    let jsonString = jsonMatch[0];
+    let parsed: any;
+    
+    try {
+      // First attempt: parse as-is (most responses are valid JSON)
+      parsed = JSON.parse(jsonString);
+    } catch (firstError: any) {
+      // If parse fails due to control characters, try smart sanitization
+      if (firstError.message?.includes('control character') || firstError.message?.includes('position')) {
+        console.warn('⚠️ JSON parse failed due to control characters, applying smart sanitization...');
+        
+        /**
+         * Smart Sanitization: Only escape control chars inside string values
+         * 
+         * Algorithm:
+         * 1. Track whether we're inside a quoted string (inString = true)
+         * 2. For chars inside strings: escape control characters
+         * 3. For chars outside strings: preserve as-is (structural JSON)
+         * 
+         * Edge Case Handling:
+         * - Properly handles escaped quotes: \"
+         * - Handles escaped backslashes: \\ (including at end of strings like "C:\\")
+         * - Only toggles inString on TRULY unescaped quotes
+         * 
+         * Quote Escape Detection:
+         * - Count consecutive backslashes before quote
+         * - Odd count (1, 3, 5...): Quote is escaped (don't toggle)
+         * - Even count (0, 2, 4...): Quote is real (toggle inString)
+         * 
+         * Examples:
+         * - "text"     → 0 backslashes (even) = real quote ✓
+         * - "te\"xt"   → 1 backslash (odd) = escaped quote (stays in string)
+         * - "C:\\"     → 2 backslashes (even) = real quote ✓
+         * - "C:\\\"x"  → 3 backslashes (odd) = escaped quote (stays in string)
+         */
+        let sanitized = '';
+        let inString = false;
+        
+        for (let i = 0; i < jsonString.length; i++) {
+          const char = jsonString[i];
+          
+          // Handle quotes: check if truly unescaped by counting preceding backslashes
+          if (char === '"') {
+            // Count consecutive backslashes immediately before this quote
+            let backslashCount = 0;
+            let j = i - 1;
+            while (j >= 0 && jsonString[j] === '\\') {
+              backslashCount++;
+              j--;
+            }
+            
+            // Toggle inString only if quote is NOT escaped (even backslash count)
+            if (backslashCount % 2 === 0) {
+              inString = !inString;
+            }
+            sanitized += char;
+          }
+          // Inside a string: escape control characters
+          else if (inString) {
+            if (char === '\n') sanitized += '\\n';        // Escape newline
+            else if (char === '\r') sanitized += '\\r';   // Escape carriage return
+            else if (char === '\t') sanitized += '\\t';   // Escape tab
+            else if (char === '\b') sanitized += '\\b';   // Escape backspace
+            else if (char === '\f') sanitized += '\\f';   // Escape form feed
+            else if (char.charCodeAt(0) < 32) {
+              // Remove other control chars (0x00-0x1F)
+              continue;
+            }
+            else sanitized += char;
+          }
+          // Outside a string: preserve as-is (structural JSON whitespace/syntax)
+          else {
+            sanitized += char;
+          }
+        }
+        
+        try {
+          // Try parsing again with smart-sanitized string
+          parsed = JSON.parse(sanitized);
+          console.log('✅ Successfully parsed after smart sanitization');
+        } catch (sanitizeError: any) {
+          // If still fails, log both errors and throw
+          console.error('❌ Parse failed even after smart sanitization:', {
+            original: firstError.message,
+            afterSanitize: sanitizeError.message,
+            jsonPreview: jsonString.slice(0, 300),
+            sanitizedPreview: sanitized.slice(0, 300)
+          });
+          throw new Error(`JSON parsing failed: ${sanitizeError.message}`);
+        }
+      } else {
+        // Re-throw if not a control character issue
+        throw firstError;
+      }
+    }
 
     /**
      * Return Type Validation & Transformation
