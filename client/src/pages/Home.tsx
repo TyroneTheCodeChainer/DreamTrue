@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Mic, Sparkles, Crown, ChevronDown, ChevronUp } from "lucide-react";
+import { Mic, Sparkles, Crown, ChevronDown, ChevronUp, Wind } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import ContextChips from "@/components/ContextChips";
 import VoiceInput from "@/components/VoiceInput";
 import DreamCard from "@/components/DreamCard";
+import BreathingExercise from "@/components/BreathingExercise";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { haptics } from "@/lib/haptics";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -17,6 +19,7 @@ export default function Home() {
   const [context, setContext] = useState<{ stress?: string; emotion?: string }>({});
   const [showVoice, setShowVoice] = useState(false);
   const [showContextChips, setShowContextChips] = useState(false);
+  const [showBreathing, setShowBreathing] = useState(false);
 
   const handleContextSelect = (type: "stress" | "emotion", value: string) => {
     setContext((prev) => ({ ...prev, [type]: value }));
@@ -62,7 +65,10 @@ export default function Home() {
         <div className="mb-6">
           <Button
             size="lg"
-            onClick={() => setShowVoice(true)}
+            onClick={() => {
+              haptics.light();
+              setShowVoice(true);
+            }}
             data-testid="button-voice-primary"
             className="w-full h-24 bg-gradient-to-br from-primary via-secondary to-primary hover:opacity-90 text-xl font-medium shadow-xl"
           >
@@ -72,6 +78,21 @@ export default function Home() {
           <p className="text-center text-xs text-muted-foreground mt-3">
             No typing needed • Perfect for 3am capture
           </p>
+
+          {/* Calm-Down Option for Nightmare Scenarios */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              haptics.light();
+              setShowBreathing(true);
+            }}
+            className="w-full mt-2 text-muted-foreground"
+            data-testid="button-breathing"
+          >
+            <Wind className="w-4 h-4 mr-2" />
+            I need a moment first
+          </Button>
         </div>
 
         {/* Divider */}
@@ -188,6 +209,19 @@ export default function Home() {
         <VoiceInput
           onTranscript={(text) => setDreamText(text)}
           onClose={() => setShowVoice(false)}
+        />
+      )}
+
+      {showBreathing && (
+        <BreathingExercise
+          onComplete={() => {
+            setShowBreathing(false);
+            setShowVoice(true);
+          }}
+          onSkip={() => {
+            setShowBreathing(false);
+            setShowVoice(true);
+          }}
         />
       )}
     </div>
