@@ -15,7 +15,7 @@ export default function ContextChips({ selected, onSelect }: ContextChipsProps) 
   return (
     <div className="space-y-3">
       <div>
-        <label className="text-sm font-medium mb-2 block">Stress Level</label>
+        <label className="text-sm font-medium mb-2 block">How stressed were you?</label>
         <div className="flex flex-wrap gap-2">
           {stressLevels.map((level) => (
             <Badge
@@ -31,7 +31,7 @@ export default function ContextChips({ selected, onSelect }: ContextChipsProps) 
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium mb-2 block">Emotional State</label>
+        <label className="text-sm font-medium mb-2 block">How did you feel?</label>
         <div className="flex flex-wrap gap-2">
           {emotions.map((emotion) => (
             <Badge

@@ -184,7 +184,7 @@ export default function DreamDetail() {
           data-testid="button-reanalyze"
         >
           <Sparkles className="w-5 h-5 mr-2" />
-          Re-analyze Dream
+          Get Another Interpretation
         </Button>
       </div>
     </div>

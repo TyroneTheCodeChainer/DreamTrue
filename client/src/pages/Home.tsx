@@ -128,7 +128,7 @@ export default function Home() {
               className="w-full h-12 bg-gradient-to-r from-primary to-[#764ba2] hover:opacity-90"
             >
               <Sparkles className="w-5 h-5 mr-2" />
-              Analyze Dream
+              Understand My Dream
             </Button>
           </div>
         </div>

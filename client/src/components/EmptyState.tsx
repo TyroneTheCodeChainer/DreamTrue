@@ -12,13 +12,13 @@ export default function EmptyState({ type, onAction }: EmptyStateProps) {
     dreams: {
       image: sleepingMoon,
       title: "No Dreams Recorded Yet",
-      description: "Start your dream journal by analyzing your first dream!",
-      action: "Analyze First Dream",
+      description: "Start your dream journal and discover what your dreams mean!",
+      action: "Record My First Dream",
     },
     patterns: {
       image: constellation,
-      title: "Not Enough Data",
-      description: "Record more dreams to discover meaningful patterns.",
+      title: "Not Enough Data Yet",
+      description: "Record more dreams to discover meaningful patterns and themes.",
       action: "Add More Dreams",
     },
   };
