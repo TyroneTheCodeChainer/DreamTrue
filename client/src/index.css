@@ -400,26 +400,22 @@
     filter: blur(0.8px);
   }
 
-  /* Smooth organic celestial twinkling animation */
+  /* Smooth organic celestial twinkling animation - opacity only */
   @keyframes twinkle {
     0%, 100% { 
-      opacity: 1; 
-      transform: scale(1);
+      opacity: 1;
     }
     50% { 
-      opacity: 0.4; 
-      transform: scale(0.95);
+      opacity: 0.4;
     }
   }
 
   @keyframes twinkle-slow {
     0%, 100% { 
-      opacity: 1; 
-      transform: scale(1);
+      opacity: 1;
     }
     50% { 
-      opacity: 0.5; 
-      transform: scale(0.97);
+      opacity: 0.5;
     }
   }
 
