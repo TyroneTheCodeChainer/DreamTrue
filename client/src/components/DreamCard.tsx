@@ -6,7 +6,7 @@ interface DreamCardProps {
   id: string;
   text: string;
   date: string;
-  confidence: number;
+  confidence?: number;
   interpretation?: string;
   onClick?: () => void;
 }
@@ -18,7 +18,8 @@ export default function DreamCard({
   interpretation,
   onClick,
 }: DreamCardProps) {
-  const getConfidenceColor = (score: number) => {
+  const getConfidenceColor = (score?: number) => {
+    if (!score) return "border-l-border";
     if (score >= 80) return "border-l-chart-3";
     if (score >= 50) return "border-l-chart-4";
     return "border-l-destructive";
@@ -40,9 +41,11 @@ export default function DreamCard({
             {date}
           </span>
         </div>
-        <Badge variant="secondary" className="text-sm py-1 px-3" title="How clear the symbolic patterns are">
-          {confidence}% clear
-        </Badge>
+        {confidence !== undefined && (
+          <Badge variant="secondary" className="text-sm py-1 px-3" title="How clear the symbolic patterns are">
+            {confidence}% clear
+          </Badge>
+        )}
       </div>
       <p className="text-body-sm line-clamp-2 mb-2 leading-relaxed">{text}</p>
       {interpretation && (
