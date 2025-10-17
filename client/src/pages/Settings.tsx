@@ -1,4 +1,4 @@
-import { Moon, Sun, Bell, Database, Info, FileText, Shield, Crown, LogOut } from "lucide-react";
+import { Moon, Sun, Bell, Database, Info, FileText, Shield, Crown, LogOut, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -112,8 +112,9 @@ export default function Settings() {
               </>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground mb-3">
-                  ✨ Quick Insight analysis available • Upgrade to save your dream journey and unlock Deep Dive
+                <p className="text-sm text-muted-foreground mb-3 flex items-start gap-1.5">
+                  <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                  <span>Quick Insight analysis available • Upgrade to save your dream journey and unlock Deep Dive</span>
                 </p>
                 <Button
                   onClick={() => setLocation("/subscribe")}

@@ -52,8 +52,9 @@ export default function Home() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-2">
             Capture Your Dream
           </h1>
-          <p className="text-sm text-muted-foreground">
-            ✨ {isPremium ? "Saved securely forever" : "Private analysis, ready when you are"}
+          <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            {isPremium ? "Saved securely forever" : "Private analysis, ready when you are"}
           </p>
         </div>
 
