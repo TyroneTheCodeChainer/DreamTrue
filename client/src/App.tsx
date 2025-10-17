@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
+import Landing from "@/pages/Landing";
 import Dreams from "@/pages/Dreams";
 import DreamDetail from "@/pages/DreamDetail";
 import Patterns from "@/pages/Patterns";
@@ -12,19 +13,29 @@ import BottomNav from "@/components/BottomNav";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
 import { initializeTheme } from "@/lib/theme";
+import { useAuth } from "@/hooks/useAuth";
 
 function Router() {
+  // From javascript_log_in_with_replit blueprint
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <>
       <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/dreams" component={Dreams} />
-        <Route path="/dream/:id" component={DreamDetail} />
-        <Route path="/patterns" component={Patterns} />
-        <Route path="/settings" component={Settings} />
+        {isLoading || !isAuthenticated ? (
+          <Route path="/" component={Landing} />
+        ) : (
+          <>
+            <Route path="/" component={Home} />
+            <Route path="/dreams" component={Dreams} />
+            <Route path="/dream/:id" component={DreamDetail} />
+            <Route path="/patterns" component={Patterns} />
+            <Route path="/settings" component={Settings} />
+          </>
+        )}
         <Route component={NotFound} />
       </Switch>
-      <BottomNav />
+      {isAuthenticated && <BottomNav />}
     </>
   );
 }
