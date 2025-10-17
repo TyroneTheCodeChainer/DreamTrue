@@ -205,7 +205,11 @@ export default function Home() {
       
       // Global window exposure for testing and debugging
       // TypeScript: Cast to 'any' to bypass window type checking
-      (window as any).__lastInterpretation = data;
+      // Also includes dream text for Results page reference
+      (window as any).__lastInterpretation = {
+        ...data,
+        dreamText, // Include original dream text for display
+      };
       
       // User feedback: Success notification
       toast({
@@ -217,12 +221,8 @@ export default function Home() {
       // Tactile feedback: Success vibration pattern
       haptics.success();
       
-      // TODO: Next step implementation
-      // Options:
-      // 1. Navigate to dedicated results page: setLocation(`/results/${interpretationId}`)
-      // 2. Show modal with interpretation: setShowResults(true)
-      // 3. Expand inline results section: setShowInlineResults(true)
-      // Decision depends on UX research and A/B testing
+      // Navigate to results page to display full interpretation
+      setLocation("/results");
     },
     
     /**

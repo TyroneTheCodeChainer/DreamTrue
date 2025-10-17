@@ -8,6 +8,7 @@ import Landing from "@/pages/Landing";
 import Subscribe from "@/pages/Subscribe";
 import Dreams from "@/pages/Dreams";
 import DreamDetail from "@/pages/DreamDetail";
+import Results from "@/pages/Results";
 import Patterns from "@/pages/Patterns";
 import Settings from "@/pages/Settings";
 import BottomNav from "@/components/BottomNav";
@@ -27,6 +28,7 @@ function Router() {
           {isLoading || !isAuthenticated ? <Landing /> : <Home />}
         </Route>
         <Route path="/subscribe" component={Subscribe} />
+        <Route path="/results" component={Results} />
         <Route path="/dreams" component={Dreams} />
         <Route path="/dream/:id" component={DreamDetail} />
         <Route path="/patterns" component={Patterns} />
