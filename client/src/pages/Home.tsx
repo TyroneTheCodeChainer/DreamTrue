@@ -10,6 +10,8 @@ import BreathingExercise from "@/components/BreathingExercise";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { haptics } from "@/lib/haptics";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -25,9 +27,35 @@ export default function Home() {
     setContext((prev) => ({ ...prev, [type]: value }));
   };
 
+  const interpretMutation = useMutation({
+    mutationFn: async (data: { dreamText: string; context: any; analysisType: string }) => {
+      const res = await apiRequest("POST", "/api/interpret", data);
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      console.log("Interpretation received:", data);
+      toast({
+        title: "Dream Interpreted!",
+        description: `Confidence: ${data.confidence}%`,
+      });
+      // TODO: Navigate to results page or show results modal
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Interpretation Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = () => {
-    // Auto Quick Insight - Deep Dive offered after analysis if premium
-    console.log("Submitting dream:", { dreamText, analysisType: 'quick_insight', context });
+    haptics.medium();
+    interpretMutation.mutate({
+      dreamText,
+      context,
+      analysisType: 'quick_insight',
+    });
   };
 
   const recentDreams = [
@@ -150,12 +178,12 @@ export default function Home() {
 
           <Button
             onClick={handleSubmit}
-            disabled={!dreamText.trim()}
+            disabled={!dreamText.trim() || interpretMutation.isPending}
             data-testid="button-analyze"
             className="w-full h-12 bg-gradient-to-r from-primary via-secondary to-primary hover:opacity-90 font-medium"
           >
-            <Sparkles className="w-5 h-5 mr-2" />
-            Analyze My Dream
+            <Sparkles className={`w-5 h-5 mr-2 ${interpretMutation.isPending ? 'animate-spin' : ''}`} />
+            {interpretMutation.isPending ? 'Analyzing...' : 'Analyze My Dream'}
           </Button>
         </div>
 

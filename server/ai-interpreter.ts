@@ -1,8 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 
 if (!process.env.ANTHROPIC_API_KEY) {
+  console.error('CRITICAL: ANTHROPIC_API_KEY environment variable is not set!');
   throw new Error('Missing required secret: ANTHROPIC_API_KEY');
 }
+
+console.log('AI Interpreter initialized with API key:', process.env.ANTHROPIC_API_KEY ? '✓ Present' : '✗ Missing');
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -98,8 +101,18 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
       analysisType
     };
 
-  } catch (error) {
-    console.error('AI interpretation error:', error);
-    throw new Error('Failed to generate dream interpretation');
+  } catch (error: any) {
+    console.error('AI interpretation error:', {
+      message: error.message,
+      status: error.status,
+      type: error.type,
+      fullError: error
+    });
+    
+    if (error.status === 401) {
+      throw new Error('AI service authentication failed. Please check API configuration.');
+    }
+    
+    throw new Error(`Failed to generate dream interpretation: ${error.message || 'Unknown error'}`);
   }
 }
