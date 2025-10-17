@@ -8,10 +8,18 @@
 ### A. Color Palette
 
 **Primary Colors (Dark & Light Mode)**
-- Primary Purple: 259 54% 72% (Base gradient start #667eea)
-- Secondary Purple: 272 44% 57% (Base gradient end #764ba2)
-- Deep Night: 259 60% 15% (Dark backgrounds)
-- Light Dream: 259 40% 98% (Light backgrounds)
+- Primary Purple: 259 54% 58% (Mystical dream purple)
+- Dark Pink: 335 65% 50-60% (Vibrant accent, light mode 50%, dark mode 60%)
+- Deep Night: 259 30% 12% (Dark backgrounds)
+- Light Dream: 0 0% 100% (Light backgrounds)
+
+**Accent Colors**
+- Pink Accent Light: 335 60% 92% (Soft pink backgrounds in light mode)
+- Pink Accent Dark: 335 40% 22% (Rich pink backgrounds in dark mode)
+
+**Gradient Combinations**
+- Purple to Pink: Primary purple → Dark pink (hero sections, CTAs)
+- Pink to Purple: Dark pink → Primary purple (reverse gradient for variety)
 
 **Functional Colors**
 - Success (High Confidence): 142 71% 45% (Green for 80%+ scores)
