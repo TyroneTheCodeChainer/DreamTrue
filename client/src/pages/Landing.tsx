@@ -15,7 +15,7 @@ export default function Landing() {
               <Moon className="w-12 h-12 text-primary" />
             </div>
             
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-[#764ba2] bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
               Understand Your Dreams
             </h1>
             
@@ -26,7 +26,7 @@ export default function Landing() {
             <Button
               onClick={() => window.location.href = "/api/login"}
               size="lg"
-              className="h-14 px-8 text-lg bg-gradient-to-r from-primary to-[#764ba2] hover:opacity-90"
+              className="h-14 px-8 text-lg bg-gradient-to-r from-primary via-secondary to-primary hover:opacity-90"
               data-testid="button-get-started"
             >
               <Sparkles className="w-5 h-5 mr-2" />
@@ -145,10 +145,10 @@ export default function Landing() {
               
               <Button
                 onClick={() => window.location.href = "/api/login"}
-                className="w-full bg-gradient-to-r from-primary to-[#764ba2]"
+                className="w-full bg-gradient-to-r from-primary via-secondary to-primary"
                 data-testid="button-start-premium"
               >
-                Start Premium Trial
+                Start Premium
               </Button>
             </Card>
           </div>
@@ -162,7 +162,7 @@ export default function Landing() {
         <Button
           onClick={() => window.location.href = "/api/login"}
           size="lg"
-          className="h-14 px-8 text-lg bg-gradient-to-r from-primary to-[#764ba2]"
+          className="h-14 px-8 text-lg bg-gradient-to-r from-primary via-secondary to-primary"
           data-testid="button-cta"
         >
           Get Started Now

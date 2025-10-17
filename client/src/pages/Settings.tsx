@@ -113,11 +113,11 @@ export default function Settings() {
             ) : (
               <>
                 <p className="text-sm text-muted-foreground mb-3">
-                  ⚠️ Your dreams disappear when you close the app. Upgrade to save them forever.
+                  ✨ Quick Insight analysis available • Upgrade to save your dream journey and unlock Deep Dive
                 </p>
                 <Button
                   onClick={() => setLocation("/subscribe")}
-                  className="w-full bg-gradient-to-r from-primary to-[#764ba2]"
+                  className="w-full bg-gradient-to-r from-primary via-secondary to-primary"
                   data-testid="button-upgrade-settings"
                 >
                   <Crown className="w-4 h-4 mr-2" />
@@ -201,14 +201,16 @@ export default function Settings() {
           </Button>
         </Card>
 
-        <Card className="p-6 bg-primary/5 border-primary/20">
+        <Card className="p-6 bg-gradient-to-br from-secondary/5 to-primary/5 border-secondary/20">
           <div className="flex items-start gap-3 mb-3">
-            <Shield className="w-6 h-6 text-primary shrink-0" />
+            <Shield className="w-6 h-6 text-secondary shrink-0" />
             <div>
               <h3 className="font-semibold text-body-sm mb-2">Your Privacy Matters</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                All dreams are encrypted and stored locally on your device. 
-                We never share your personal dream data with third parties.
+                {isPremium 
+                  ? "Premium dreams are encrypted and stored securely in your private account. We never share your personal dream data with third parties."
+                  : "Your dream analysis is private. Free tier dreams are analyzed securely but not saved. Upgrade for permanent storage."
+                }
               </p>
             </div>
           </div>
