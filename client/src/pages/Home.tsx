@@ -85,6 +85,7 @@ export default function Home() {
    */
   const [dreamText, setDreamText] = useState("");
   const [context, setContext] = useState<{ stress?: string; emotion?: string }>({});
+  const [analysisType, setAnalysisType] = useState<"quick_insight" | "deep_dive">("quick_insight");
   const [showVoice, setShowVoice] = useState(false);
   const [showContextChips, setShowContextChips] = useState(false);
   const [showBreathing, setShowBreathing] = useState(false);
@@ -305,6 +306,29 @@ export default function Home() {
    * - "Upgrade for Deep Dive" CTA for free users
    * - Remember user preference in localStorage
    */
+  /**
+   * Analysis Type Selection Handler
+   * 
+   * Handles user selecting Deep Dive analysis.
+   * Shows upgrade CTA for free users, allows premium users to select.
+   */
+  const handleAnalysisTypeChange = (type: "quick_insight" | "deep_dive") => {
+    if (type === "deep_dive" && !isPremium) {
+      // Free user trying to access premium feature
+      haptics.light();
+      toast({
+        title: "Premium Feature",
+        description: "Upgrade to unlock Deep Dive analysis with multi-perspective insights",
+        variant: "default",
+      });
+      setLocation("/subscribe");
+      return;
+    }
+    
+    setAnalysisType(type);
+    haptics.light();
+  };
+
   const handleSubmit = () => {
     // Tactile feedback for button press
     haptics.medium();
@@ -313,7 +337,7 @@ export default function Home() {
     interpretMutation.mutate({
       dreamText,    // Required: User's dream description
       context,      // Optional: Stress level and/or emotion
-      analysisType: 'quick_insight', // Free tier analysis mode
+      analysisType, // User-selected analysis type
     });
   };
 
@@ -422,17 +446,88 @@ export default function Home() {
             )}
           </div>
 
-          {/* Simple Analysis Info */}
-          <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
-            <p className="text-sm text-foreground">
-              <Sparkles className="w-4 h-4 inline mr-1.5 text-primary" />
-              <strong>Quick Insight</strong> in ~10 seconds
-            </p>
-            {isPremium && (
-              <p className="text-xs text-muted-foreground mt-1">
-                You can request Deep Dive analysis after results
+          {/* Analysis Type Selector */}
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-foreground">Analysis Type</p>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Quick Insight Option */}
+              <button
+                type="button"
+                onClick={() => handleAnalysisTypeChange("quick_insight")}
+                data-testid="button-quick-insight"
+                className={`
+                  relative p-4 rounded-lg border-2 transition-all
+                  ${analysisType === "quick_insight" 
+                    ? "border-primary bg-primary/10" 
+                    : "border-border bg-card hover-elevate active-elevate-2"
+                  }
+                `}
+              >
+                <div className="flex items-start gap-2">
+                  <div className={`
+                    w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5
+                    ${analysisType === "quick_insight" ? "border-primary" : "border-muted-foreground"}
+                  `}>
+                    {analysisType === "quick_insight" && (
+                      <div className="w-3 h-3 rounded-full bg-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-sm">Quick Insight</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">~10 seconds</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Deep Dive Option */}
+              <button
+                type="button"
+                onClick={() => handleAnalysisTypeChange("deep_dive")}
+                data-testid="button-deep-dive"
+                className={`
+                  relative p-4 rounded-lg border-2 transition-all
+                  ${analysisType === "deep_dive" 
+                    ? "border-primary bg-primary/10" 
+                    : "border-border bg-card hover-elevate active-elevate-2"
+                  }
+                `}
+              >
+                <div className="flex items-start gap-2">
+                  <div className={`
+                    w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5
+                    ${analysisType === "deep_dive" ? "border-primary" : "border-muted-foreground"}
+                  `}>
+                    {analysisType === "deep_dive" && (
+                      <div className="w-3 h-3 rounded-full bg-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-sm flex items-center gap-1">
+                      Deep Dive
+                      {!isPremium && <Crown className="w-3 h-3 text-primary" />}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">~30 seconds</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+            
+            {/* Analysis Type Description */}
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="text-xs text-muted-foreground">
+                {analysisType === "quick_insight" ? (
+                  <>
+                    <Sparkles className="w-3 h-3 inline mr-1 text-primary" />
+                    Fast AI analysis with key symbols and themes
+                  </>
+                ) : (
+                  <>
+                    <Crown className="w-3 h-3 inline mr-1 text-primary" />
+                    Comprehensive multi-perspective analysis with Jungian, Freudian, and neuroscience insights
+                  </>
+                )}
               </p>
-            )}
+            </div>
           </div>
 
           <Button
