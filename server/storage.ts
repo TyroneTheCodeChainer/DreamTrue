@@ -75,8 +75,8 @@ export class DatabaseStorage implements IStorage {
       .set({
         stripeCustomerId,
         stripeSubscriptionId,
-        isPremium: true,
-        subscriptionStatus: 'active',
+        // DO NOT set isPremium here - only webhook sets it after payment confirmation
+        subscriptionStatus: 'pending', // Pending until webhook confirms payment
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
