@@ -7,6 +7,7 @@ import { insertDreamSchema, insertInterpretationSchema, users } from "@shared/sc
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
+import { interpretDream } from "./ai-interpreter";
 
 // Initialize Stripe (from javascript_stripe blueprint)
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -29,6 +30,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // AI Dream Interpretation Route (NEW!)
+  app.post("/api/interpret", isAuthenticated, async (req: any, res) => {
+    try {
+      const { dreamText, context, analysisType } = req.body;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!dreamText || dreamText.trim().length < 10) {
+        return res.status(400).json({ message: "Dream text must be at least 10 characters" });
+      }
+
+      if (analysisType === 'deep_dive' && !user?.isPremium) {
+        return res.status(403).json({ 
+          message: "Premium subscription required for Deep Dive analysis",
+          upgradeUrl: "/subscribe"
+        });
+      }
+
+      const interpretation = await interpretDream(
+        dreamText,
+        context || {},
+        analysisType || 'quick_insight'
+      );
+
+      res.json(interpretation);
+      
+    } catch (error: any) {
+      console.error("Interpretation error:", error);
+      res.status(500).json({ message: error.message || "Failed to interpret dream" });
     }
   });
 
