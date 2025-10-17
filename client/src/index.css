@@ -242,7 +242,7 @@
     position: relative;
   }
 
-  /* Starry night sky - realistic celestial stars with glow */
+  /* Starry night sky - realistic celestial stars with glow and blue tints */
   #root::before {
     content: '';
     position: fixed;
@@ -255,56 +255,65 @@
     z-index: 10;
     border-radius: 50%;
     box-shadow: 
-      /* Bright stars with glow */
-      100px 150px 0 1px rgba(255,255,255,1),
-      100px 150px 0 3px rgba(255,255,255,0.3),
-      350px 80px 0 1px rgba(255,255,255,0.9),
-      350px 80px 0 2px rgba(255,255,255,0.2),
-      -200px 100px 0 1.5px rgba(255,255,255,0.95),
-      -200px 100px 0 3px rgba(255,255,255,0.25),
-      550px -180px 0 1px rgba(255,255,255,1),
-      550px -180px 0 4px rgba(255,255,255,0.2),
-      -450px 300px 0 1.5px rgba(255,255,255,0.9),
-      -450px 300px 0 3px rgba(255,255,255,0.3),
+      /* Large bright stars with glow */
+      100px 150px 0 2px rgba(255,255,255,1),
+      100px 150px 0 5px rgba(255,255,255,0.4),
+      350px 80px 0 2.5px rgba(220,230,255,0.95),
+      350px 80px 0 4px rgba(220,230,255,0.3),
+      -200px 100px 0 2px rgba(255,255,255,0.95),
+      -200px 100px 0 5px rgba(255,255,255,0.3),
+      550px -180px 0 2.5px rgba(230,240,255,1),
+      550px -180px 0 6px rgba(230,240,255,0.25),
+      -450px 300px 0 2px rgba(255,255,255,0.9),
+      -450px 300px 0 4px rgba(255,255,255,0.35),
+      
+      /* Medium-large stars with blue tints */
+      200px -50px 0 1.5px rgba(240,245,255,0.85),
+      200px -50px 0 3px rgba(240,245,255,0.2),
+      -100px -200px 0 1.5px rgba(255,255,255,0.9),
+      400px -100px 0 1.5px rgba(220,235,255,0.8),
+      -350px -150px 0 2px rgba(255,255,255,0.95),
+      -350px -150px 0 3px rgba(255,255,255,0.25),
+      600px 50px 0 2px rgba(230,240,255,0.9),
+      -500px 250px 0 1.5px rgba(255,255,255,0.85),
+      150px 300px 0 1.5px rgba(240,245,255,0.8),
+      -250px -50px 0 1.5px rgba(255,255,255,0.85),
+      500px -200px 0 1.5px rgba(225,235,255,0.9),
       
       /* Medium stars */
-      200px -50px 0 1px rgba(255,255,255,0.8),
-      -100px -200px 0 1px rgba(255,255,255,0.85),
-      400px -100px 0 1px rgba(255,255,255,0.75),
-      -350px -150px 0 1px rgba(255,255,255,0.9),
-      600px 50px 0 1.5px rgba(255,255,255,0.85),
-      -500px 250px 0 1px rgba(255,255,255,0.8),
-      150px 300px 0 1px rgba(255,255,255,0.75),
-      -250px -50px 0 1px rgba(255,255,255,0.8),
-      500px -200px 0 1px rgba(255,255,255,0.85),
+      50px 200px 0 1px rgba(255,255,255,0.75),
+      -400px 150px 0 1px rgba(235,242,255,0.7),
+      300px -250px 0 1px rgba(255,255,255,0.8),
+      -150px 350px 0 1px rgba(240,245,255,0.75),
+      450px 180px 0 1px rgba(255,255,255,0.8),
+      -300px -100px 0 1px rgba(230,240,255,0.75),
+      250px 100px 0 1px rgba(255,255,255,0.7),
+      -550px -200px 0 1px rgba(240,245,255,0.75),
+      -50px 400px 0 1px rgba(255,255,255,0.8),
+      350px -50px 0 1px rgba(225,235,255,0.7),
+      -200px 200px 0 1px rgba(255,255,255,0.75),
+      420px -280px 0 1px rgba(235,242,255,0.8),
+      -380px 380px 0 1px rgba(255,255,255,0.75),
+      180px -380px 0 1px rgba(230,240,255,0.7),
       
       /* Smaller distant stars */
-      50px 200px 0 0.5px rgba(255,255,255,0.6),
-      -400px 150px 0 0.5px rgba(255,255,255,0.65),
-      300px -250px 0 0.5px rgba(255,255,255,0.7),
-      -150px 350px 0 0.5px rgba(255,255,255,0.6),
-      450px 180px 0 0.5px rgba(255,255,255,0.65),
-      -300px -100px 0 0.5px rgba(255,255,255,0.7),
-      250px 100px 0 0.5px rgba(255,255,255,0.6),
-      -550px -200px 0 0.5px rgba(255,255,255,0.65),
-      -50px 400px 0 0.5px rgba(255,255,255,0.7),
-      350px -50px 0 0.5px rgba(255,255,255,0.6),
-      -200px 200px 0 0.5px rgba(255,255,255,0.65),
-      
-      /* Tiny stars for depth */
-      120px 80px 0 0.5px rgba(255,255,255,0.5),
-      -180px 60px 0 0.5px rgba(255,255,255,0.45),
-      280px 180px 0 0.5px rgba(255,255,255,0.5),
-      -320px 220px 0 0.5px rgba(255,255,255,0.45),
-      420px -80px 0 0.5px rgba(255,255,255,0.5),
-      -480px -120px 0 0.5px rgba(255,255,255,0.45),
-      180px -180px 0 0.5px rgba(255,255,255,0.5),
-      -220px -280px 0 0.5px rgba(255,255,255,0.45);
+      120px 80px 0 0.8px rgba(255,255,255,0.6),
+      -180px 60px 0 0.8px rgba(240,245,255,0.55),
+      280px 180px 0 0.8px rgba(255,255,255,0.65),
+      -320px 220px 0 0.8px rgba(235,242,255,0.6),
+      420px -80px 0 0.8px rgba(255,255,255,0.65),
+      -480px -120px 0 0.8px rgba(230,240,255,0.6),
+      180px -180px 0 0.8px rgba(255,255,255,0.65),
+      -220px -280px 0 0.8px rgba(240,245,255,0.6),
+      -60px -60px 0 0.8px rgba(255,255,255,0.6),
+      520px 320px 0 0.8px rgba(235,242,255,0.65),
+      -140px 440px 0 0.8px rgba(255,255,255,0.6),
+      380px -340px 0 0.8px rgba(230,240,255,0.65);
     animation: twinkle 4s ease-in-out infinite;
-    filter: blur(0.3px);
+    filter: blur(0.4px);
   }
   
-  /* Additional layer for more stars */
+  /* Additional layer for density and depth */
   #root::after {
     content: '';
     position: fixed;
@@ -317,19 +326,29 @@
     z-index: 10;
     border-radius: 50%;
     box-shadow:
-      /* More scattered stars */
-      -300px 150px 0 0.5px rgba(255,255,255,0.6),
-      400px 250px 0 0.5px rgba(255,255,255,0.55),
-      -150px -120px 0 0.5px rgba(255,255,255,0.6),
-      320px -220px 0 0.5px rgba(255,255,255,0.55),
-      -520px 80px 0 0.5px rgba(255,255,255,0.6),
-      220px 380px 0 0.5px rgba(255,255,255,0.55),
-      -80px 280px 0 0.5px rgba(255,255,255,0.6),
-      480px -60px 0 0.5px rgba(255,255,255,0.55),
-      -420px -180px 0 0.5px rgba(255,255,255,0.6),
-      80px -320px 0 0.5px rgba(255,255,255,0.55);
+      /* More scattered stars with blue tints */
+      -300px 150px 0 1px rgba(255,255,255,0.7),
+      400px 250px 0 1px rgba(230,240,255,0.65),
+      -150px -120px 0 1px rgba(255,255,255,0.7),
+      320px -220px 0 1px rgba(240,245,255,0.65),
+      -520px 80px 0 1px rgba(255,255,255,0.7),
+      220px 380px 0 1px rgba(235,242,255,0.65),
+      -80px 280px 0 1px rgba(255,255,255,0.7),
+      480px -60px 0 1px rgba(230,240,255,0.65),
+      -420px -180px 0 1px rgba(255,255,255,0.7),
+      80px -320px 0 1px rgba(240,245,255,0.65),
+      -240px 50px 0 0.8px rgba(255,255,255,0.6),
+      160px -140px 0 0.8px rgba(235,242,255,0.6),
+      -560px 200px 0 0.8px rgba(255,255,255,0.6),
+      340px 340px 0 0.8px rgba(230,240,255,0.6),
+      -20px -360px 0 0.8px rgba(255,255,255,0.6),
+      540px 120px 0 0.8px rgba(240,245,255,0.6),
+      -460px -260px 0 0.8px rgba(255,255,255,0.6),
+      260px -20px 0 0.8px rgba(235,242,255,0.6),
+      -340px -340px 0 0.8px rgba(255,255,255,0.6),
+      440px 440px 0 0.8px rgba(230,240,255,0.6);
     animation: twinkle 5s ease-in-out infinite reverse;
-    filter: blur(0.3px);
+    filter: blur(0.4px);
   }
 
   /* Gentle celestial twinkling animation */
