@@ -2,6 +2,7 @@ import { Mic, Square, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { haptics, sounds } from "@/lib/haptics";
 
 interface VoiceInputProps {
   onTranscript: (text: string) => void;
@@ -23,17 +24,24 @@ export default function VoiceInput({ onTranscript, onClose }: VoiceInputProps) {
 
   const toggleRecording = () => {
     if (!isRecording) {
+      // Starting recording
+      haptics.medium();
+      sounds.playRecordStart();
       setIsRecording(true);
       // Simulate recording
       setTimeout(() => {
         setTranscript("I was flying over my childhood home with incredible freedom, feeling weightless and powerful...");
       }, 1500);
     } else {
+      // Stopping recording
+      haptics.medium();
+      sounds.playComplete();
       setIsRecording(false);
     }
   };
 
   const handleDone = () => {
+    haptics.success();
     if (transcript) {
       onTranscript(transcript);
     }
