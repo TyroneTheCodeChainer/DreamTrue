@@ -313,7 +313,7 @@
     filter: blur(0.4px);
   }
   
-  /* Additional layer for density and depth */
+  /* Additional layer for density and depth - MANY MORE STARS */
   #root::after {
     content: '';
     position: fixed;
@@ -346,7 +346,56 @@
       -460px -260px 0 0.8px rgba(255,255,255,0.6),
       260px -20px 0 0.8px rgba(235,242,255,0.6),
       -340px -340px 0 0.8px rgba(255,255,255,0.6),
-      440px 440px 0 0.8px rgba(230,240,255,0.6);
+      440px 440px 0 0.8px rgba(230,240,255,0.6),
+      /* Additional dense star layer */
+      30px 90px 0 0.8px rgba(255,255,255,0.55),
+      -90px 30px 0 0.8px rgba(240,245,255,0.5),
+      170px 240px 0 0.8px rgba(255,255,255,0.6),
+      -270px -90px 0 0.8px rgba(230,240,255,0.55),
+      370px -150px 0 0.8px rgba(255,255,255,0.6),
+      -470px 210px 0 0.8px rgba(235,242,255,0.55),
+      90px -290px 0 0.8px rgba(255,255,255,0.6),
+      -190px 370px 0 0.8px rgba(240,245,255,0.55),
+      290px 130px 0 0.8px rgba(255,255,255,0.6),
+      -390px -230px 0 0.8px rgba(230,240,255,0.55),
+      490px 310px 0 0.8px rgba(255,255,255,0.6),
+      -110px 190px 0 0.8px rgba(235,242,255,0.55),
+      210px -110px 0 0.8px rgba(255,255,255,0.6),
+      -310px 270px 0 0.8px rgba(240,245,255,0.55),
+      410px -190px 0 0.8px rgba(255,255,255,0.6),
+      -510px -70px 0 0.8px rgba(230,240,255,0.55),
+      130px 350px 0 0.8px rgba(255,255,255,0.6),
+      -230px -150px 0 0.8px rgba(235,242,255,0.55),
+      330px 230px 0 0.8px rgba(255,255,255,0.6),
+      -430px 110px 0 0.8px rgba(240,245,255,0.55),
+      530px -250px 0 0.8px rgba(255,255,255,0.6),
+      -30px -410px 0 0.8px rgba(230,240,255,0.55),
+      250px 70px 0 0.8px rgba(255,255,255,0.6),
+      -350px -310px 0 0.8px rgba(235,242,255,0.55),
+      450px 170px 0 0.8px rgba(255,255,255,0.6),
+      -550px 330px 0 0.8px rgba(240,245,255,0.55),
+      70px 290px 0 0.8px rgba(255,255,255,0.6),
+      -170px -50px 0 0.8px rgba(230,240,255,0.55),
+      270px -330px 0 0.8px rgba(255,255,255,0.6),
+      -370px 410px 0 0.8px rgba(235,242,255,0.55),
+      470px 50px 0 0.8px rgba(255,255,255,0.6),
+      -130px 230px 0 0.8px rgba(240,245,255,0.55),
+      230px -210px 0 0.8px rgba(255,255,255,0.6),
+      -330px -130px 0 0.8px rgba(230,240,255,0.55),
+      430px 290px 0 0.8px rgba(255,255,255,0.6),
+      -530px -310px 0 0.8px rgba(235,242,255,0.55),
+      50px -170px 0 0.8px rgba(255,255,255,0.6),
+      -250px 350px 0 0.8px rgba(240,245,255,0.55),
+      350px -90px 0 0.8px rgba(255,255,255,0.6),
+      -450px 150px 0 0.8px rgba(230,240,255,0.55),
+      550px 230px 0 0.8px rgba(255,255,255,0.6),
+      110px -250px 0 0.8px rgba(235,242,255,0.55),
+      -210px 110px 0 0.8px rgba(255,255,255,0.6),
+      310px 390px 0 0.8px rgba(240,245,255,0.55),
+      -410px -170px 0 0.8px rgba(255,255,255,0.6),
+      510px -350px 0 0.8px rgba(230,240,255,0.55),
+      -50px 150px 0 0.8px rgba(255,255,255,0.6),
+      150px -70px 0 0.8px rgba(235,242,255,0.55);
     animation: twinkle 5s ease-in-out infinite reverse;
     filter: blur(0.4px);
   }
