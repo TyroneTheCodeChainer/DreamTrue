@@ -242,80 +242,79 @@
     position: relative;
   }
 
-  /* Starry night background effect */
+  /* Starry night background - using box-shadow for guaranteed visibility */
   body::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 2px;
+    background: white;
     pointer-events: none;
     z-index: 0;
-    background-color: transparent;
-    background-image: 
-      radial-gradient(circle, white 1px, transparent 1px),
-      radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 1px),
-      radial-gradient(circle, rgba(200, 200, 200, 0.9) 0.5px, transparent 0.5px),
-      radial-gradient(circle, white 0.5px, transparent 0.5px),
-      radial-gradient(circle, rgba(255, 255, 255, 0.7) 1px, transparent 1px),
-      radial-gradient(circle, rgba(220, 220, 220, 0.8) 0.5px, transparent 0.5px),
-      radial-gradient(circle, white 1px, transparent 1px),
-      radial-gradient(circle, rgba(255, 255, 255, 0.6) 0.5px, transparent 0.5px);
-    background-size: 
-      550px 550px,
-      350px 350px,
-      250px 250px,
-      450px 450px,
-      650px 650px,
-      300px 300px,
-      500px 500px,
-      400px 400px;
-    background-position: 
-      0 0,
-      40px 60px,
-      130px 270px,
-      70px 100px,
-      200px 50px,
-      300px 300px,
-      150px 200px,
-      400px 150px;
+    border-radius: 50%;
+    box-shadow: 
+      100px 150px 0 0 white,
+      350px 80px 0 0 rgba(255,255,255,0.8),
+      550px 220px 0 0 white,
+      -200px 100px 0 0 rgba(220,220,220,0.9),
+      -450px 300px 0 0 white,
+      200px -50px 0 0 rgba(255,255,255,0.7),
+      -100px -200px 0 0 white,
+      400px -100px 0 0 rgba(200,200,200,0.8),
+      -350px -150px 0 0 white,
+      600px 50px 0 0 rgba(255,255,255,0.9),
+      -500px 250px 0 0 white,
+      150px 300px 0 0 rgba(210,210,210,0.8),
+      -250px -50px 0 0 white,
+      500px -200px 0 0 rgba(255,255,255,0.7),
+      50px 200px 0 0 white,
+      -400px 150px 0 0 rgba(230,230,230,0.8),
+      300px -250px 0 0 white,
+      -150px 350px 0 0 rgba(255,255,255,0.9),
+      450px 180px 0 0 white,
+      -300px -100px 0 0 rgba(200,200,200,0.7),
+      250px 100px 0 0 white,
+      -550px -200px 0 0 rgba(255,255,255,0.8),
+      -50px 400px 0 0 white,
+      350px -50px 0 0 rgba(220,220,220,0.9),
+      -200px 200px 0 0 white,
+      500px 300px 0 0 rgba(255,255,255,0.7),
+      100px -150px 0 0 white,
+      -350px 50px 0 0 rgba(240,240,240,0.8),
+      -100px 100px 0 0 white,
+      300px 250px 0 0 rgba(255,255,255,0.9),
+      -450px -250px 0 0 white,
+      550px -150px 0 0 rgba(200,200,200,0.8),
+      200px -300px 0 0 white,
+      -250px 450px 0 0 rgba(255,255,255,0.7),
+      400px 400px 0 0 white,
+      -500px 100px 0 0 rgba(210,210,210,0.9),
+      150px -100px 0 0 white,
+      -300px 300px 0 0 rgba(255,255,255,0.8),
+      600px -50px 0 0 white,
+      -150px -300px 0 0 rgba(230,230,230,0.7),
+      50px -200px 0 0 white,
+      -400px -100px 0 0 rgba(255,255,255,0.9),
+      350px 150px 0 0 white,
+      250px -50px 0 0 rgba(220,220,220,0.8),
+      -200px -200px 0 0 white,
+      450px -250px 0 0 rgba(255,255,255,0.7),
+      -550px 350px 0 0 white,
+      100px 450px 0 0 rgba(200,200,200,0.9),
+      -50px -100px 0 0 white,
+      500px 100px 0 0 rgba(255,255,255,0.8);
   }
 
   /* Gentle twinkling animation */
   @keyframes twinkle {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+    50% { opacity: 0.6; }
   }
 
   body::before {
-    animation: twinkle 4s ease-in-out infinite;
-  }
-
-  /* Extra stars for dark mode visibility */
-  .dark body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-    background-color: transparent;
-    background-image: 
-      radial-gradient(circle, rgba(255, 255, 255, 0.9) 1px, transparent 1px),
-      radial-gradient(circle, rgba(240, 240, 240, 0.8) 0.5px, transparent 0.5px),
-      radial-gradient(circle, white 0.5px, transparent 0.5px);
-    background-size: 
-      600px 600px,
-      400px 400px,
-      500px 500px;
-    background-position: 
-      100px 150px,
-      250px 80px,
-      350px 400px;
-    animation: twinkle 3s ease-in-out infinite reverse;
+    animation: twinkle 3s ease-in-out infinite;
   }
 
   /* Ensure content is above stars */
