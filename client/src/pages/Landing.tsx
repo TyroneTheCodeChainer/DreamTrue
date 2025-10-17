@@ -4,10 +4,10 @@ import { Moon, Sparkles, Lock, Mic, Clock, Shield } from "lucide-react";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-primary/5">
+    <div className="min-h-screen bg-gradient-to-b from-background/95 to-primary/10">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background/90 to-background/95" />
         
         <div className="relative container mx-auto px-4 py-16 md:py-24">
           <div className="text-center max-w-3xl mx-auto">

@@ -44,7 +44,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen pb-20 bg-gradient-to-b from-background via-background to-secondary/5">
+    <div className="min-h-screen pb-20 bg-gradient-to-b from-background/95 via-background/90 to-secondary/10">
       {/* Immediate Capture - No Hero Image */}
       <div className="px-6 pt-8">
         {/* Simple Header */}

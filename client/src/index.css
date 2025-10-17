@@ -242,8 +242,8 @@
     position: relative;
   }
 
-  /* Starry night background - using box-shadow for guaranteed visibility */
-  body::before {
+  /* Starry night background - positioned inside #root to be visible above backgrounds */
+  #root::before {
     content: '';
     position: fixed;
     top: 50%;
@@ -252,7 +252,7 @@
     height: 2px;
     background: white;
     pointer-events: none;
-    z-index: 0;
+    z-index: 10;
     border-radius: 50%;
     box-shadow: 
       100px 150px 0 0 white,
@@ -305,16 +305,13 @@
       100px 450px 0 0 rgba(200,200,200,0.9),
       -50px -100px 0 0 white,
       500px 100px 0 0 rgba(255,255,255,0.8);
+    animation: twinkle 3s ease-in-out infinite;
   }
 
   /* Gentle twinkling animation */
   @keyframes twinkle {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
-  }
-
-  body::before {
-    animation: twinkle 3s ease-in-out infinite;
   }
 
   /* Ensure content is above stars */
