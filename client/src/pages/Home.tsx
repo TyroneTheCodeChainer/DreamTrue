@@ -1,16 +1,20 @@
 import { useState } from "react";
-import { Mic, Sparkles } from "lucide-react";
+import { Mic, Sparkles, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import SystemToggle from "@/components/SystemToggle";
 import ContextChips from "@/components/ContextChips";
 import VoiceInput from "@/components/VoiceInput";
 import DreamCard from "@/components/DreamCard";
 import heroImage from "@assets/generated_images/Purple_night_sky_hero_82505c89.png";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const { isPremium } = useAuth();
+  const { toast } = useToast();
   const [dreamText, setDreamText] = useState("");
   const [system, setSystem] = useState<"rag" | "agentic">("rag");
   const [context, setContext] = useState<{ stress?: string; emotion?: string }>({});
@@ -18,6 +22,28 @@ export default function Home() {
 
   const handleContextSelect = (type: "stress" | "emotion", value: string) => {
     setContext((prev) => ({ ...prev, [type]: value }));
+  };
+
+  const handleSystemChange = (newSystem: "rag" | "agentic") => {
+    // Feature gating: lock Deep Dive for free users
+    if (newSystem === "agentic" && !isPremium) {
+      toast({
+        title: "Premium Feature",
+        description: "Deep Dive analysis requires a premium subscription. Upgrade to unlock!",
+        action: (
+          <Button
+            onClick={() => setLocation("/subscribe")}
+            size="sm"
+            className="bg-gradient-to-r from-primary to-[#764ba2]"
+          >
+            <Crown className="w-4 h-4 mr-1" />
+            Upgrade
+          </Button>
+        ),
+      });
+      return;
+    }
+    setSystem(newSystem);
   };
 
   const handleSubmit = () => {
@@ -66,7 +92,7 @@ export default function Home() {
           {/* Privacy & Reassurance */}
           <div className="text-center space-y-1">
             <p className="text-body-sm text-muted-foreground">
-              🔒 Your dreams are private and stored locally
+              🔒 Your dreams are private{isPremium ? " and saved securely" : " (temporary - upgrade to save forever)"}
             </p>
             <p className="text-sm text-muted-foreground/80">
               Take your time, every dream is valid
@@ -113,12 +139,26 @@ export default function Home() {
             
             <div>
               <label className="text-body-sm font-medium mb-3 block">Choose Your Interpretation Style</label>
-              <SystemToggle value={system} onChange={setSystem} />
+              <SystemToggle value={system} onChange={handleSystemChange} />
               <p className="text-sm text-muted-foreground mt-2">
                 {system === "rag"
                   ? "Get quick reassurance in ~10 seconds"
-                  : "Explore deeper meaning in ~40 seconds"}
+                  : isPremium
+                  ? "Explore deeper meaning in ~40 seconds"
+                  : "Unlock Deep Dive with Premium"}
               </p>
+              {!isPremium && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation("/subscribe")}
+                  className="mt-3 w-full"
+                  data-testid="button-upgrade-prompt"
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  Upgrade to Premium for Deep Dive
+                </Button>
+              )}
             </div>
 
             <Button

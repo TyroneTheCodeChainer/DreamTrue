@@ -1,13 +1,36 @@
-import { Moon, Sun, Bell, Database, Info, FileText, Shield } from "lucide-react";
+import { Moon, Sun, Bell, Database, Info, FileText, Shield, Crown, LogOut } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { toggleTheme } from "@/lib/theme";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
 
 export default function Settings() {
   const [darkMode, setDarkMode] = useState(true);
   const [notifications, setNotifications] = useState(false);
+  const { user, isPremium, isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  // Redirect to home if not authenticated (from blueprint pageLevelUnauthorizedErrorHandling)
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Please Log In",
+        description: "You need to be logged in to access settings.",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, isLoading, toast]);
 
   useEffect(() => {
     setDarkMode(document.documentElement.classList.contains('dark'));
@@ -16,6 +39,30 @@ export default function Settings() {
   const handleToggleDarkMode = () => {
     const isDark = toggleTheme();
     setDarkMode(isDark);
+  };
+
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/cancel-subscription");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: "Subscription Canceled",
+        description: "Your premium subscription has been canceled. You'll retain access until the end of your billing period.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Cancellation Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleLogout = () => {
+    window.location.href = "/api/logout";
   };
 
   return (
@@ -27,6 +74,59 @@ export default function Settings() {
             Customize your dream journaling experience
           </p>
         </div>
+
+        {/* Account & Subscription Section */}
+        <Card className="p-5">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="font-semibold text-body">
+                  {user?.firstName || user?.email || "Account"}
+                </p>
+                {isPremium && (
+                  <Badge className="bg-gradient-to-r from-primary to-[#764ba2]">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Premium
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            {isPremium ? (
+              <>
+                <p className="text-sm text-muted-foreground mb-3">
+                  You have access to Deep Dive analysis and persistent dream storage
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => cancelSubscriptionMutation.mutate()}
+                  disabled={cancelSubscriptionMutation.isPending}
+                  className="w-full"
+                  data-testid="button-cancel-subscription"
+                >
+                  {cancelSubscriptionMutation.isPending ? "Canceling..." : "Cancel Subscription"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-3">
+                  ⚠️ Your dreams disappear when you close the app. Upgrade to save them forever.
+                </p>
+                <Button
+                  onClick={() => setLocation("/subscribe")}
+                  className="w-full bg-gradient-to-r from-primary to-[#764ba2]"
+                  data-testid="button-upgrade-settings"
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  Upgrade to Premium
+                </Button>
+              </>
+            )}
+          </div>
+        </Card>
 
         <Card className="p-5 space-y-5">
           <div className="flex items-center justify-between gap-4">
@@ -122,6 +222,16 @@ export default function Settings() {
             Research-backed AI dream interpretation
           </p>
         </Card>
+
+        <Button
+          variant="outline"
+          onClick={handleLogout}
+          className="w-full"
+          data-testid="button-logout"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Log Out
+        </Button>
       </div>
     </div>
   );

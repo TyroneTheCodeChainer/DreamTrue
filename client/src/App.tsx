@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import Landing from "@/pages/Landing";
+import Subscribe from "@/pages/Subscribe";
 import Dreams from "@/pages/Dreams";
 import DreamDetail from "@/pages/DreamDetail";
 import Patterns from "@/pages/Patterns";
@@ -22,17 +23,14 @@ function Router() {
   return (
     <>
       <Switch>
-        {isLoading || !isAuthenticated ? (
-          <Route path="/" component={Landing} />
-        ) : (
-          <>
-            <Route path="/" component={Home} />
-            <Route path="/dreams" component={Dreams} />
-            <Route path="/dream/:id" component={DreamDetail} />
-            <Route path="/patterns" component={Patterns} />
-            <Route path="/settings" component={Settings} />
-          </>
-        )}
+        <Route path="/">
+          {isLoading || !isAuthenticated ? <Landing /> : <Home />}
+        </Route>
+        <Route path="/subscribe" component={Subscribe} />
+        <Route path="/dreams" component={Dreams} />
+        <Route path="/dream/:id" component={DreamDetail} />
+        <Route path="/patterns" component={Patterns} />
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
       {isAuthenticated && <BottomNav />}
