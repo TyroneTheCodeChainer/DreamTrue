@@ -33,18 +33,29 @@ export default function Home() {
       return await res.json();
     },
     onSuccess: (data) => {
-      console.log("Interpretation received:", data);
+      console.log("✨ Interpretation received:", data);
+      
+      // Expose to window for testing
+      (window as any).__lastInterpretation = data;
+      
+      // Show success toast with longer duration
       toast({
         title: "Dream Interpreted!",
-        description: `Confidence: ${data.confidence}%`,
+        description: `Confidence: ${data.confidence}% • ${data.themes?.length || 0} themes identified`,
+        duration: 5000,
       });
+      
+      haptics.success();
+      
       // TODO: Navigate to results page or show results modal
     },
     onError: (error: Error) => {
+      console.error("❌ Interpretation error:", error);
       toast({
         title: "Interpretation Failed",
         description: error.message,
         variant: "destructive",
+        duration: 5000,
       });
     },
   });

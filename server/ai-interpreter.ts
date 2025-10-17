@@ -1,14 +1,16 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error('CRITICAL: ANTHROPIC_API_KEY environment variable is not set!');
-  throw new Error('Missing required secret: ANTHROPIC_API_KEY');
+const apiKey = process.env.REPLIT_ANTHROPIC_KEY || process.env.ANTHROPIC_API_KEY;
+
+if (!apiKey) {
+  console.error('CRITICAL: No Anthropic API key found! Check REPLIT_ANTHROPIC_KEY or ANTHROPIC_API_KEY');
+  throw new Error('Missing required secret: Anthropic API key');
 }
 
-console.log('AI Interpreter initialized with API key:', process.env.ANTHROPIC_API_KEY ? '✓ Present' : '✗ Missing');
+console.log('AI Interpreter initialized with API key:', apiKey ? '✓ Present (using REPLIT_ANTHROPIC_KEY)' : '✗ Missing');
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: apiKey,
 });
 
 interface DreamContext {
