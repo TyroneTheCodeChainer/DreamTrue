@@ -26,6 +26,8 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { haptics } from "@/lib/haptics";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface InterpretationData {
   interpretation: string;
@@ -42,6 +44,7 @@ export default function Results() {
   const { isPremium } = useAuth();
   const { toast } = useToast();
   const [interpretation, setInterpretation] = useState<InterpretationData | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     // Get interpretation from window (passed from Home page)
@@ -56,6 +59,54 @@ export default function Results() {
     setInterpretation(data);
   }, [navigate]);
 
+  /**
+   * Save Dream Mutation
+   * 
+   * Saves both dream and interpretation to database (premium only).
+   * Two-step process: create dream first, then link interpretation.
+   */
+  const saveDreamMutation = useMutation({
+    mutationFn: async () => {
+      if (!interpretation) throw new Error("No interpretation to save");
+
+      // Step 1: Create dream record
+      const dreamResponse = await apiRequest("POST", "/api/dreams", {
+        content: interpretation.dreamText,
+        mood: null, // Could extract from context in future
+        stressLevel: null, // Could extract from context in future
+      });
+      const dream = await dreamResponse.json();
+
+      // Step 2: Create interpretation record linked to dream
+      const interpretationResponse = await apiRequest("POST", "/api/interpretations", {
+        dreamId: dream.id,
+        analysisType: interpretation.analysisType,
+        interpretation: interpretation.interpretation,
+        symbols: interpretation.symbols,
+        emotions: interpretation.emotions,
+        themes: interpretation.themes,
+        confidence: interpretation.confidence,
+      });
+      
+      return { dream, interpretation: await interpretationResponse.json() };
+    },
+    onSuccess: () => {
+      setIsSaved(true);
+      haptics.success();
+      toast({
+        title: "Dream Saved!",
+        description: "Your interpretation has been saved to your journal",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save dream",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSave = () => {
     if (!isPremium) {
       toast({
@@ -67,13 +118,15 @@ export default function Results() {
       return;
     }
 
-    haptics.success();
-    toast({
-      title: "Dream Saved!",
-      description: "Your interpretation has been saved to your journal",
-    });
-    
-    // TODO: Actually save to database via /api/dreams
+    if (isSaved) {
+      toast({
+        title: "Already Saved",
+        description: "This dream is already in your journal",
+      });
+      return;
+    }
+
+    saveDreamMutation.mutate();
   };
 
   const handleShare = () => {
@@ -133,11 +186,12 @@ export default function Results() {
               variant="default"
               size="sm"
               onClick={handleSave}
+              disabled={saveDreamMutation.isPending || isSaved}
               data-testid="button-save"
               className="gap-2"
             >
               <Save className="w-4 h-4" />
-              Save Dream
+              {saveDreamMutation.isPending ? "Saving..." : isSaved ? "Saved" : "Save Dream"}
             </Button>
           </div>
         </div>
