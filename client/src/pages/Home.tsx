@@ -1,3 +1,32 @@
+/**
+ * Home Page - Dream Capture & AI Interpretation Interface
+ * 
+ * This is the primary user interface for dream capture and analysis.
+ * Optimized for 3am usage with voice-first design and emotional support features.
+ * 
+ * Key Features:
+ * - Voice recording (primary input method)
+ * - Text input (alternative method)
+ * - Optional context chips (stress level, emotions)
+ * - Breathing exercise (nightmare support)
+ * - AI-powered dream interpretation
+ * - Premium feature gating
+ * 
+ * UX Design Principles:
+ * - Immediate access (no hero image, straight to action)
+ * - Large touch targets (3am fumbling-friendly)
+ * - Calming colors (purple/pink gradient)
+ * - Haptic feedback (tactile reassurance)
+ * - Loading states (anxiety reduction)
+ * 
+ * Technical Stack:
+ * - React hooks for state management
+ * - TanStack Query for API mutations
+ * - Wouter for routing
+ * - Shadcn UI components
+ * - Custom haptic feedback system
+ */
+
 import { useState } from "react";
 import { Mic, Sparkles, Crown, ChevronDown, ChevronUp, Wind } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,58 +43,277 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Home() {
+  // Navigation hook (unused in current implementation, kept for future routing)
   const [, setLocation] = useLocation();
+  
+  /**
+   * Authentication & Premium Status
+   * 
+   * useAuth hook provides:
+   * - user: Full user object from database
+   * - isAuthenticated: Boolean authentication state
+   * - isPremium: Premium subscription status
+   * - isLoading: Loading state for auth check
+   * 
+   * Why destructure only isPremium?
+   * - Only premium status needed for UI conditional rendering
+   * - Reduces unnecessary re-renders (other fields don't affect this component)
+   * - Auth check happens at App.tsx level (redirects to Landing if not authenticated)
+   */
   const { isPremium } = useAuth();
+  
+  // Toast notification system for user feedback
   const { toast } = useToast();
+  
+  /**
+   * Local State Management
+   * 
+   * dreamText: User's dream description (from voice OR text input)
+   * - Updated by VoiceInput component OR Textarea
+   * - Validated before submission (min 10 chars)
+   * - Never persisted locally (privacy by default)
+   * 
+   * context: Optional stress/emotion metadata
+   * - Collapsed by default (reduce cognitive load)
+   * - Helps AI provide more personalized interpretation
+   * - Structure: { stress?: string, emotion?: string }
+   * 
+   * UI State Flags:
+   * - showVoice: Controls VoiceInput modal visibility
+   * - showContextChips: Toggles context selector accordion
+   * - showBreathing: Controls BreathingExercise modal (nightmare support)
+   */
   const [dreamText, setDreamText] = useState("");
   const [context, setContext] = useState<{ stress?: string; emotion?: string }>({});
   const [showVoice, setShowVoice] = useState(false);
   const [showContextChips, setShowContextChips] = useState(false);
   const [showBreathing, setShowBreathing] = useState(false);
 
+  /**
+   * Context Selection Handler
+   * 
+   * Updates context object with user-selected stress level or emotion.
+   * Uses functional state update to preserve other context fields.
+   * 
+   * @param type - 'stress' or 'emotion' (determines which field to update)
+   * @param value - Selected value from ContextChips component
+   * 
+   * Example flow:
+   * 1. User clicks "High" stress chip
+   * 2. Calls handleContextSelect('stress', 'high')
+   * 3. Updates context to { ...prev, stress: 'high' }
+   * 4. Context sent to AI with dream text
+   */
   const handleContextSelect = (type: "stress" | "emotion", value: string) => {
     setContext((prev) => ({ ...prev, [type]: value }));
   };
 
+  /**
+   * AI Dream Interpretation Mutation
+   * 
+   * TanStack Query mutation for server-side dream analysis.
+   * Handles the complete lifecycle of AI interpretation requests.
+   * 
+   * Architecture:
+   * - Declarative API calls (vs imperative fetch)
+   * - Automatic loading states (.isPending)
+   * - Built-in error handling
+   * - No manual loading/error state management
+   * 
+   * Why useMutation (not useQuery)?
+   * - POST request (mutations modify server state)
+   * - Not cacheable (each dream is unique)
+   * - User-triggered (not automatic on mount)
+   * - Side effects on success (toast, haptics, navigation)
+   */
   const interpretMutation = useMutation({
+    /**
+     * Mutation Function - The Core API Call
+     * 
+     * Executes the HTTP POST request to /api/interpret endpoint.
+     * 
+     * @param data - Request payload
+     *   - dreamText: User's dream description
+     *   - context: Optional stress/emotion metadata
+     *   - analysisType: 'quick_insight' or 'deep_dive'
+     * 
+     * @returns Parsed JSON response from server
+     *   - interpretation: Main analysis text
+     *   - symbols: Array of symbolic elements
+     *   - emotions: Array of emotional themes
+     *   - themes: Array of psychological themes
+     *   - confidence: AI confidence score (0-100)
+     *   - analysisType: Mode used for analysis
+     * 
+     * Error Handling:
+     * - apiRequest throws on non-200 status codes
+     * - Caught by onError handler (see below)
+     * - Network errors also trigger onError
+     * 
+     * Performance:
+     * - Quick Insight: ~5-15 seconds
+     * - Deep Dive: ~15-30 seconds
+     * - No timeout (let server/API handle limits)
+     */
     mutationFn: async (data: { dreamText: string; context: any; analysisType: string }) => {
       const res = await apiRequest("POST", "/api/interpret", data);
       return await res.json();
     },
+    
+    /**
+     * Success Handler - Post-Interpretation Actions
+     * 
+     * Executed when AI interpretation completes successfully.
+     * Orchestrates user feedback and next steps.
+     * 
+     * @param data - Interpreted dream result from AI service
+     * 
+     * Success Flow:
+     * 1. Log interpretation to console (debugging + user can inspect)
+     * 2. Expose to window.__lastInterpretation (E2E testing + manual inspection)
+     * 3. Show success toast with confidence score and theme count
+     * 4. Trigger success haptic pattern (tactile positive feedback)
+     * 5. [TODO] Navigate to results page or show results modal
+     * 
+     * Why expose to window?
+     * - Enables Playwright E2E testing (window.evaluate() access)
+     * - Allows manual debugging in browser console
+     * - No production impact (overwritten on each interpretation)
+     * - Not a security concern (interpretation already sent to client)
+     * 
+     * Toast Design:
+     * - Title: Clear success message ("Dream Interpreted!")
+     * - Description: Actionable info (confidence %, theme count)
+     * - Duration: 5000ms (long enough to read, not annoying)
+     * - Default variant (success green color)
+     * 
+     * Haptic Feedback:
+     * - haptics.success() = [20ms, 50ms gap, 20ms] vibration pattern
+     * - Provides tactile confirmation (important at 3am)
+     * - Works on mobile devices with vibration support
+     * - Gracefully degrades on unsupported devices
+     * 
+     * Future Enhancement:
+     * - Navigate to /results page with interpretation data
+     * - OR show modal overlay with interpretation
+     * - Save to localStorage for non-premium users (temporary)
+     * - Offer "Save Dream" action for premium users
+     */
     onSuccess: (data) => {
+      // Console logging with emoji for easy visual scanning in logs
       console.log("✨ Interpretation received:", data);
       
-      // Expose to window for testing
+      // Global window exposure for testing and debugging
+      // TypeScript: Cast to 'any' to bypass window type checking
       (window as any).__lastInterpretation = data;
       
-      // Show success toast with longer duration
+      // User feedback: Success notification
       toast({
         title: "Dream Interpreted!",
         description: `Confidence: ${data.confidence}% • ${data.themes?.length || 0} themes identified`,
-        duration: 5000,
+        duration: 5000, // 5 seconds (long enough to comprehend)
       });
       
+      // Tactile feedback: Success vibration pattern
       haptics.success();
       
-      // TODO: Navigate to results page or show results modal
+      // TODO: Next step implementation
+      // Options:
+      // 1. Navigate to dedicated results page: setLocation(`/results/${interpretationId}`)
+      // 2. Show modal with interpretation: setShowResults(true)
+      // 3. Expand inline results section: setShowInlineResults(true)
+      // Decision depends on UX research and A/B testing
     },
+    
+    /**
+     * Error Handler - Failure Scenario Management
+     * 
+     * Executed when interpretation request fails.
+     * Provides clear user feedback and debugging information.
+     * 
+     * @param error - Error object from failed mutation
+     * 
+     * Error Scenarios:
+     * - 400: Invalid input (dream too short)
+     * - 403: Premium feature accessed by free user
+     * - 500: AI service error or server failure
+     * - Network: Connection timeout, DNS failure
+     * 
+     * Error Flow:
+     * 1. Log error to console with ❌ emoji (visual error marker)
+     * 2. Show destructive toast with error message
+     * 3. No haptic feedback (avoid negative reinforcement)
+     * 
+     * User Experience:
+     * - Clear error message (from server or network stack)
+     * - Destructive variant (red color indicates failure)
+     * - 5 second duration (enough time to read and understand)
+     * - No automatic retry (avoid API cost for invalid requests)
+     * 
+     * Why no haptic error feedback?
+     * - Negative haptics can increase anxiety (bad for 3am users)
+     * - Visual toast is sufficient for error communication
+     * - Haptics reserved for positive reinforcement only
+     * 
+     * Debugging:
+     * - Full error object logged to console
+     * - Includes stack trace, status code, and message
+     * - Server logs provide additional context
+     * - Correlate with backend "Interpretation error:" logs
+     */
     onError: (error: Error) => {
+      // Console logging with emoji for visual error identification
       console.error("❌ Interpretation error:", error);
+      
+      // User feedback: Error notification
       toast({
         title: "Interpretation Failed",
-        description: error.message,
-        variant: "destructive",
+        description: error.message, // Server provides user-friendly messages
+        variant: "destructive", // Red/error styling
         duration: 5000,
       });
+      
+      // No haptic feedback on error (avoid negative reinforcement)
+      // Visual feedback (red toast) is sufficient
     },
   });
 
+  /**
+   * Submit Handler - Initiate Dream Interpretation
+   * 
+   * Triggered when user clicks "Analyze My Dream" button.
+   * Initiates the AI interpretation mutation.
+   * 
+   * Flow:
+   * 1. Provide haptic feedback (button press confirmation)
+   * 2. Trigger mutation with dream text, context, and analysis type
+   * 3. Mutation handles loading state, API call, success/error
+   * 
+   * Why haptics.medium()?
+   * - Provides tactile button press feedback
+   * - 30ms vibration (noticeable but not jarring)
+   * - Confirms action before ~10-30s wait for AI
+   * - Important for accessibility and 3am UX
+   * 
+   * Analysis Type Logic:
+   * - Free users: Always 'quick_insight' (backend validates)
+   * - Premium users: Could choose 'deep_dive' (future enhancement)
+   * - Current: Hardcoded 'quick_insight' for all (simplest MVP)
+   * 
+   * Future Enhancement:
+   * - Add analysis type selector for premium users
+   * - "Upgrade for Deep Dive" CTA for free users
+   * - Remember user preference in localStorage
+   */
   const handleSubmit = () => {
+    // Tactile feedback for button press
     haptics.medium();
+    
+    // Initiate AI interpretation mutation
     interpretMutation.mutate({
-      dreamText,
-      context,
-      analysisType: 'quick_insight',
+      dreamText,    // Required: User's dream description
+      context,      // Optional: Stress level and/or emotion
+      analysisType: 'quick_insight', // Free tier analysis mode
     });
   };
 

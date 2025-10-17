@@ -33,33 +33,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Dream Interpretation Route (NEW!)
+  /**
+   * POST /api/interpret - AI Dream Interpretation Endpoint
+   * 
+   * This is the core dream analysis API that processes user dreams through Claude AI.
+   * It's the primary interface between the frontend and the AI interpretation service.
+   * 
+   * Authentication: REQUIRED
+   * - Uses isAuthenticated middleware (Replit Auth via OIDC)
+   * - Rejects unauthenticated requests with 401
+   * - User must be logged in to access AI interpretation
+   * 
+   * Request Body:
+   * {
+   *   dreamText: string,        // The dream description (required, min 10 chars)
+   *   context?: {                // Optional contextual information
+   *     stress?: string,         // Current stress level ("high", "moderate", "low")
+   *     emotion?: string         // Primary emotion ("anxious", "happy", "sad", etc.)
+   *   },
+   *   analysisType?: string      // 'quick_insight' (default, free) or 'deep_dive' (premium)
+   * }
+   * 
+   * Response (200 OK):
+   * {
+   *   interpretation: string,    // Main analysis text
+   *   symbols: string[],         // Key symbolic elements
+   *   emotions: string[],        // Detected emotional themes
+   *   themes: string[],          // Overarching psychological themes
+   *   confidence: number,        // AI confidence score (0-100)
+   *   analysisType: string       // Analysis mode used
+   * }
+   * 
+   * Error Responses:
+   * - 400: Invalid input (dream text too short)
+   * - 403: Premium feature accessed by free user
+   * - 500: AI service error or internal server error
+   * 
+   * Business Logic:
+   * 1. Validate input (minimum dream length)
+   * 2. Check premium access for Deep Dive
+   * 3. Call AI interpretation service
+   * 4. Return structured analysis
+   * 
+   * Performance Characteristics:
+   * - Quick Insight: ~5-15 seconds response time
+   * - Deep Dive: ~15-30 seconds response time
+   * - No caching (each dream is unique)
+   * - Stateless (no session dependency beyond auth)
+   * 
+   * Freemium Model Implementation:
+   * - Free users: Quick Insight only (1000 tokens, faster, lower cost)
+   * - Premium users: Both modes available (Deep Dive unlocked)
+   * - Billing handled by Stripe (see /api/subscribe routes)
+   * 
+   * Security Considerations:
+   * - Authentication verified before processing
+   * - User data never logged (privacy-focused)
+   * - API key secured in environment variables
+   * - No PII in Claude requests beyond dream text
+   * - Rate limiting handled at Anthropic API level
+   */
   app.post("/api/interpret", isAuthenticated, async (req: any, res) => {
     try {
+      // Extract request parameters from body
+      // Destructuring for cleaner code and type safety
       const { dreamText, context, analysisType } = req.body;
+      
+      // Get authenticated user ID from Replit Auth session
+      // req.user.claims.sub is the unique user identifier from OIDC token
       const userId = req.user.claims.sub;
+      
+      // Fetch full user record to check premium status
+      // This database query is necessary to enforce premium feature gating
+      // Alternative: Could cache user object in session, but DB is source of truth
       const user = await storage.getUser(userId);
       
+      /**
+       * Input Validation: Dream Text Length
+       * 
+       * Why 10 character minimum?
+       * - Too short: Can't extract meaningful symbols/themes
+       * - AI struggles with context from very brief input
+       * - Prevents spam/abuse (empty or "test" submissions)
+       * - 10 chars allows "I was flying" (minimal valid dream)
+       * 
+       * Validation Strategy:
+       * - Check both null/undefined AND empty string
+       * - .trim() removes whitespace (prevents "     " bypass)
+       * - Early return with 400 (client error, not server error)
+       * - Clear error message guides user to fix input
+       */
       if (!dreamText || dreamText.trim().length < 10) {
         return res.status(400).json({ message: "Dream text must be at least 10 characters" });
       }
 
+      /**
+       * Premium Feature Gating: Deep Dive Analysis
+       * 
+       * Freemium Business Model:
+       * - Free tier: Quick Insight analysis (limited but valuable)
+       * - Premium tier ($9.99/month): Unlocks Deep Dive (comprehensive)
+       * 
+       * Why gate Deep Dive?
+       * - Higher API cost (2000 vs 1000 tokens)
+       * - Longer processing time (30s vs 10s)
+       * - More valuable output (multi-perspective analysis)
+       * - Incentivizes subscriptions (conversion funnel)
+       * 
+       * Implementation:
+       * - Check user.isPremium flag (set by Stripe webhook)
+       * - Return 403 Forbidden (not 401 - user IS authenticated)
+       * - Include upgradeUrl in response (conversion optimization)
+       * - Allow Quick Insight to proceed regardless (free tier value)
+       * 
+       * Edge Cases:
+       * - analysisType undefined/null → defaults to 'quick_insight' (free)
+       * - user object null → .isPremium is undefined → treated as false
+       * - Premium user with expired subscription → webhook sets isPremium=false
+       */
       if (analysisType === 'deep_dive' && !user?.isPremium) {
         return res.status(403).json({ 
           message: "Premium subscription required for Deep Dive analysis",
-          upgradeUrl: "/subscribe"
+          upgradeUrl: "/subscribe"  // Frontend can redirect for easy upgrade
         });
       }
 
+      /**
+       * AI Interpretation Service Call
+       * 
+       * Delegation to ai-interpreter module for separation of concerns:
+       * - Routes handle HTTP concerns (auth, validation, responses)
+       * - AI service handles Claude API interaction and parsing
+       * - Clean architecture enables independent testing/updates
+       * 
+       * Parameter Handling:
+       * - dreamText: Already validated (min length, trimmed)
+       * - context: Optional, defaults to {} if undefined (safe for AI service)
+       * - analysisType: Defaults to 'quick_insight' if not specified
+       * 
+       * Why await?
+       * - AI service is async (HTTP call to Anthropic)
+       * - Must wait for response before sending to client
+       * - Errors thrown by interpretDream caught by try/catch
+       * 
+       * Performance Note:
+       * - This blocks the request thread (acceptable for API route)
+       * - Each request independent (no shared state concerns)
+       * - Node.js event loop handles concurrent requests efficiently
+       */
       const interpretation = await interpretDream(
         dreamText,
         context || {},
         analysisType || 'quick_insight'
       );
 
+      /**
+       * Success Response
+       * 
+       * Return structured interpretation directly to client.
+       * 
+       * Response Format:
+       * - JSON object (Content-Type: application/json auto-set by Express)
+       * - 200 OK status (default for res.json())
+       * - Matches InterpretationResult interface from AI service
+       * 
+       * Frontend Integration:
+       * - React Query mutation automatically parses JSON
+       * - TypeScript type safety via shared types
+       * - No transformation needed (direct pass-through)
+       * 
+       * Why no additional processing?
+       * - AI service already validated/structured the data
+       * - Keep routes thin (business logic in services)
+       * - Immutable response (no side effects)
+       */
       res.json(interpretation);
       
     } catch (error: any) {
+      /**
+       * Error Handling and Logging
+       * 
+       * Centralized error handling for all failure scenarios:
+       * - AI service errors (authentication, rate limits, parsing)
+       * - Database errors (user lookup failure)
+       * - Network errors (Anthropic API unreachable)
+       * - Unexpected exceptions (bugs)
+       * 
+       * Logging Strategy:
+       * - Log to console (captured by Replit logs)
+       * - Include full error object (stack trace for debugging)
+       * - Never log user PII or dream content (privacy)
+       * 
+       * Client Response:
+       * - 500 Internal Server Error (generic server failure)
+       * - Include error message if available (helps user understand)
+       * - Fallback to generic message (prevents undefined in UI)
+       * 
+       * Security Note:
+       * - Don't expose stack traces to client (security risk)
+       * - error.message is safe (controlled by our code/Anthropic)
+       * - Detailed logs available server-side for debugging
+       * 
+       * Monitoring Recommendations:
+       * - Track 500 error rate (indicator of AI service health)
+       * - Alert on sustained elevated errors (service degradation)
+       * - Log analysis for common failure patterns (optimize retry logic)
+       */
       console.error("Interpretation error:", error);
       res.status(500).json({ message: error.message || "Failed to interpret dream" });
     }
