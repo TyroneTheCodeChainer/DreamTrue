@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 interface ConfidenceMeterProps {
   score: number;
   size?: number;
+  showLabel?: boolean;
 }
 
 export default function ConfidenceMeter({
   score,
   size = 120,
+  showLabel = true,
 }: ConfidenceMeterProps) {
   const [displayScore, setDisplayScore] = useState(0);
 
@@ -66,7 +68,11 @@ export default function ConfidenceMeter({
         <div className="text-3xl font-bold" data-testid="confidence-score">
           {Math.round(displayScore)}%
         </div>
-        <div className="text-xs text-muted-foreground">Confidence</div>
+        {showLabel && (
+          <div className="text-xs text-muted-foreground text-center px-2">
+            Pattern<br/>Clarity
+          </div>
+        )}
       </div>
     </div>
   );

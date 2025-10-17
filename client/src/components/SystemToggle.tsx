@@ -1,4 +1,4 @@
-import { Zap, Brain } from "lucide-react";
+import { Sparkles, Brain } from "lucide-react";
 
 interface SystemToggleProps {
   value: "rag" | "agentic";
@@ -17,8 +17,8 @@ export default function SystemToggle({ value, onChange }: SystemToggleProps) {
             : "text-muted-foreground hover-elevate"
         }`}
       >
-        <Zap className="w-4 h-4" />
-        Quick RAG
+        <Sparkles className="w-4 h-4" />
+        Quick Insight
       </button>
       <button
         onClick={() => onChange("agentic")}
@@ -30,7 +30,7 @@ export default function SystemToggle({ value, onChange }: SystemToggleProps) {
         }`}
       >
         <Brain className="w-4 h-4" />
-        Deep Analysis
+        Deep Dive
       </button>
     </div>
   );

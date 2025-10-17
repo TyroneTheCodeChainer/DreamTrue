@@ -53,7 +53,7 @@ export default function Patterns() {
           <StatsCard
             icon={TrendingUp}
             value={`${stats.avgConfidence}%`}
-            label="Avg Confidence"
+            label="Pattern Clarity"
             gradient
           />
           <StatsCard
@@ -99,8 +99,8 @@ export default function Patterns() {
               indicates a desire for freedom or escape from daily pressures.
             </p>
             <p className="text-body-sm leading-relaxed text-foreground/90">
-              Your average confidence score of <strong>78%</strong> suggests
-              clear symbolic patterns in your dreams.
+              Your dreams show <strong>78% pattern clarity</strong> on average,
+              meaning the symbols and themes are quite distinct and meaningful.
             </p>
             <p className="text-body-sm leading-relaxed text-foreground/90">
               💡 Try journaling your emotional state before sleep to

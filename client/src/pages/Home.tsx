@@ -112,12 +112,12 @@ export default function Home() {
             <ContextChips selected={context} onSelect={handleContextSelect} />
             
             <div>
-              <label className="text-body-sm font-medium mb-3 block">Analysis Type</label>
+              <label className="text-body-sm font-medium mb-3 block">Choose Your Interpretation Style</label>
               <SystemToggle value={system} onChange={setSystem} />
               <p className="text-sm text-muted-foreground mt-2">
                 {system === "rag"
-                  ? "Fast interpretation (~10 seconds)"
-                  : "Comprehensive multi-agent analysis (~40 seconds)"}
+                  ? "Get quick reassurance in ~10 seconds"
+                  : "Explore deeper meaning in ~40 seconds"}
               </p>
             </div>
 

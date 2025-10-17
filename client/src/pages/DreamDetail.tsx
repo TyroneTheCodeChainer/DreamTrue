@@ -63,14 +63,19 @@ export default function DreamDetail() {
           </p>
         </div>
 
-        {/* Dream Text with Confidence */}
+        {/* Dream Text with Pattern Clarity */}
         <Card className="p-6">
           <div className="flex items-start gap-6">
             <div className="flex-1">
               <h2 className="text-display font-semibold mb-3">Your Dream</h2>
               <p className="text-body leading-relaxed text-foreground/90">{dream.text}</p>
             </div>
-            <ConfidenceMeter score={dream.confidence} size={100} />
+            <div className="flex flex-col items-center gap-1">
+              <ConfidenceMeter score={dream.confidence} size={100} showLabel={false} />
+              <p className="text-xs text-muted-foreground text-center mt-1">
+                How clear the<br/>patterns are
+              </p>
+            </div>
           </div>
         </Card>
 

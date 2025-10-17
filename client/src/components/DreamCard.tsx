@@ -40,8 +40,8 @@ export default function DreamCard({
             {date}
           </span>
         </div>
-        <Badge variant="secondary" className="text-sm py-1 px-3">
-          {confidence}%
+        <Badge variant="secondary" className="text-sm py-1 px-3" title="How clear the symbolic patterns are">
+          {confidence}% clear
         </Badge>
       </div>
       <p className="text-body-sm line-clamp-2 mb-2 leading-relaxed">{text}</p>
