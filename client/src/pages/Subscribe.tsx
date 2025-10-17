@@ -96,13 +96,36 @@ export default function Subscribe() {
     // Create subscription as soon as the page loads
     if (isAuthenticated && !isLoading) {
       apiRequest("POST", "/api/create-subscription")
-        .then((response: any) => {
-          if (response.clientSecret) {
-            setClientSecret(response.clientSecret);
+        .then((data: any) => {
+          // apiRequest already returns parsed JSON, not raw Response
+          if (data.clientSecret) {
+            setClientSecret(data.clientSecret);
+          } else if (data.errorType === 'config_missing') {
+            // Stripe not configured - show helpful error
+            toast({
+              title: "Subscription Unavailable",
+              description: "Stripe payment system is not yet configured. Please contact support.",
+              variant: "destructive",
+              duration: 10000,
+            });
+            setTimeout(() => setLocation("/"), 2000);
           }
         })
         .catch((error) => {
           console.error("Failed to create subscription:", error);
+          
+          // Error message from apiRequest
+          const errorMessage = error.message || "Unable to set up subscription. Please try again later.";
+          
+          toast({
+            title: "Subscription Error",
+            description: errorMessage,
+            variant: "destructive",
+            duration: 8000,
+          });
+          
+          // Redirect back to home after showing error
+          setTimeout(() => setLocation("/"), 3000);
         });
     }
   }, [user, setLocation, isAuthenticated, isLoading, toast]);
@@ -110,7 +133,7 @@ export default function Subscribe() {
   if (!clientSecret) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading" data-testid="loading-subscription"/>
       </div>
     );
   }

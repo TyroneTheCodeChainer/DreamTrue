@@ -389,6 +389,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      // Check if Stripe Price ID is configured
+      const stripePriceId = process.env.STRIPE_PRICE_ID;
+      if (!stripePriceId) {
+        console.error("❌ STRIPE_PRICE_ID environment variable not configured");
+        return res.status(500).json({ 
+          message: "Stripe subscription not configured. Please contact support or set up STRIPE_PRICE_ID in environment variables.",
+          errorType: "config_missing"
+        });
+      }
+
       // If user already has a subscription, return it
       if (user.stripeSubscriptionId) {
         const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
@@ -407,12 +417,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      // Create subscription - For now, we'll return a setup intent for the frontend
-      // The actual price will be configured in the Stripe dashboard
+      // Create subscription with configured price ID
       const subscription = await stripe.subscriptions.create({
         customer: customer.id,
         items: [{
-          price: 'price_dreamlens_premium', // Placeholder - will be configured in Stripe dashboard
+          price: stripePriceId, // Use price ID from environment variable
         }],
         payment_behavior: 'default_incomplete',
         payment_settings: { save_default_payment_method: 'on_subscription' },
