@@ -229,6 +229,71 @@ export default function Subscribe() {
           </ul>
         </Card>
 
+        {/* Deep Dive Comparison */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-center">See the Difference</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Free Quick Insight */}
+            <Card className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Quick Insight</p>
+                  <p className="text-xs text-muted-foreground">Free (~10s)</p>
+                </div>
+              </div>
+              <div className="text-xs space-y-2 text-muted-foreground">
+                <p className="italic">"I was flying over a city at night, feeling peaceful but also uncertain..."</p>
+                <div className="pt-2 border-t space-y-1">
+                  <p className="font-medium text-foreground">Quick Analysis:</p>
+                  <p>Flying often represents freedom and perspective. Night settings suggest exploring unconscious thoughts. The mixed emotions indicate you're processing both excitement and anxiety about new possibilities.</p>
+                  <div className="flex gap-2 flex-wrap mt-2">
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">Freedom</span>
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">Uncertainty</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Premium Deep Dive */}
+            <Card className="p-4 border-primary/50 bg-gradient-to-br from-primary/5 to-secondary/5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Deep Dive</p>
+                  <p className="text-xs text-primary">Premium (~40s)</p>
+                </div>
+              </div>
+              <div className="text-xs space-y-2">
+                <p className="italic text-muted-foreground">"I was flying over a city at night, feeling peaceful but also uncertain..."</p>
+                <div className="pt-2 border-t space-y-2">
+                  <div>
+                    <p className="font-medium">Psychological Analysis:</p>
+                    <p className="text-muted-foreground">Flying dreams during transitions often reflect your subconscious processing autonomy vs. security. The nighttime city represents navigating complex social/career structures while maintaining emotional distance.</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">Cultural Context:</p>
+                    <p className="text-muted-foreground">Cities symbolize collective consciousness; your aerial view suggests observer perspective rather than participant—common during major life decisions.</p>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">Autonomy</span>
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">Transition</span>
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">Observer</span>
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">Decision-making</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+          <p className="text-center text-xs text-muted-foreground mt-3">
+            Deep Dive provides multi-perspective analysis with psychological, cultural, and symbolic insights
+          </p>
+        </div>
+
         {/* Pricing */}
         <Card className="p-6 mb-6 text-center">
           <p className="text-4xl font-bold mb-2">$9.99<span className="text-lg font-normal text-muted-foreground">/month</span></p>
