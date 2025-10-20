@@ -14,6 +14,37 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 20, 2025)
 
+### Freemium Model Improvements (Latest)
+1. **Free User Persistence - 3 Dream Limit** (server/routes.ts, server/storage.ts)
+   - All users now get dream auto-save during interpretation
+   - Free tier: Maximum 3 saved dreams (habit-building tier)
+   - Premium tier: Unlimited dream storage
+   - Backend checks dream count before save, returns `limitReached` flag
+   - When limit reached: Dream still interpreted but not saved
+
+2. **Dreams Page for All Users** (client/src/pages/Dreams.tsx)
+   - Removed premium-only gate from Dreams page
+   - Free users see up to 3 saved dreams
+   - Dream count indicator: "2/3 dreams saved" for free tier
+   - Upgrade CTA banner when limit reached
+   - Premium users see unlimited count display
+
+3. **Smart Toast Notifications** (client/src/pages/Home.tsx)
+   - "Dream Interpreted & Saved!" for successful saves
+   - "Dream Interpreted! (Not Saved)" when free tier limit reached
+   - Clear feedback on save status
+
+4. **Subscribe Page Enhancements** (client/src/pages/Subscribe.tsx)
+   - Side-by-side Deep Dive vs Quick Insight comparison
+   - Realistic example interpretations showing value difference
+   - Social proof: "Join 500+ users" messaging
+   - Trust signals: Cancel anytime, 30-day guarantee, instant access
+   - Deep Dive shows psychological + cultural analysis vs Quick Insight
+
+5. **New API Endpoint**: `/api/dreams/stats`
+   - Returns: `{ count: number, limit: number | null, isPremium: boolean }`
+   - Used for dream count indicators across UI
+
 ### Frontend Enhancements
 1. **Character Counter & Validation** (client/src/pages/Home.tsx)
    - Real-time character counter for dream input (3,500 char limit)
