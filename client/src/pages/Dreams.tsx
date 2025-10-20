@@ -33,6 +33,12 @@ interface Dream {
   createdAt: string;
 }
 
+interface DreamStats {
+  count: number;
+  limit: number | null;
+  isPremium: boolean;
+}
+
 export default function Dreams() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,12 +47,22 @@ export default function Dreams() {
   /**
    * Dreams Query - Fetch user's saved dreams
    * 
-   * Fetches from /api/dreams endpoint (premium only).
-   * Free users receive empty array from backend.
+   * NEW: All users can access saved dreams (free tier: max 3)
    */
   const { data: dreams = [], isLoading, error } = useQuery<Dream[]>({
     queryKey: ["/api/dreams"],
-    enabled: !authLoading, // Wait for auth to load first
+    enabled: !authLoading,
+  });
+
+  /**
+   * Dream Stats Query - Get count and limit info
+   * 
+   * Shows "2/3 dreams saved" for free users
+   * Shows "Unlimited" for premium users
+   */
+  const { data: stats } = useQuery<DreamStats>({
+    queryKey: ["/api/dreams/stats"],
+    enabled: !authLoading,
   });
 
   /**
@@ -98,60 +114,10 @@ export default function Dreams() {
   }
 
   /**
-   * Free User State
-   * Shows upgrade CTA for non-premium users
+   * NEW: All users can access Dreams page
+   * Free users: See up to 3 dreams with upgrade CTA when limit reached
+   * Premium users: Unlimited dreams
    */
-  if (!isPremium) {
-    return (
-      <div className="min-h-screen pb-20 pt-6">
-        <div className="px-6 space-y-6">
-          <div>
-            <h1 className="text-display font-bold">My Dreams</h1>
-            <p className="text-body-sm text-muted-foreground mt-1">
-              Save and revisit your dreams
-            </p>
-          </div>
-
-          <Card className="p-8 text-center bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
-            <Crown className="w-16 h-16 mx-auto mb-4 text-primary" />
-            <h2 className="text-xl font-semibold mb-2">Unlock Your Dream Journal</h2>
-            <p className="text-muted-foreground mb-6">
-              Upgrade to Premium to save unlimited dreams, track patterns over time, 
-              and unlock Deep Dive analysis with comprehensive insights.
-            </p>
-            <Button
-              onClick={() => setLocation("/subscribe")}
-              className="gap-2"
-              data-testid="button-upgrade"
-            >
-              <Crown className="w-4 h-4" />
-              Upgrade to Premium
-            </Button>
-          </Card>
-
-          <div className="mt-8 space-y-3">
-            <p className="text-sm font-medium text-muted-foreground text-center">
-              Premium Features Include:
-            </p>
-            <div className="space-y-2">
-              {[
-                "Save unlimited dream interpretations",
-                "Access your full dream history",
-                "Pattern recognition across dreams",
-                "Deep Dive multi-perspective analysis",
-                "Export and share interpretations"
-              ].map((feature, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm text-foreground">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  {feature}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   /**
    * Error State
@@ -182,7 +148,14 @@ export default function Dreams() {
           <div>
             <h1 className="text-display font-bold">My Dreams</h1>
             <p className="text-body-sm text-muted-foreground mt-1">
-              {dreams.length} {dreams.length === 1 ? 'dream' : 'dreams'} recorded
+              {stats?.limit ? (
+                <span>
+                  {stats.count}/{stats.limit} dreams saved
+                  {stats.count >= stats.limit && <span className="text-amber-500 ml-1">• Limit reached</span>}
+                </span>
+              ) : (
+                <span>{dreams.length} {dreams.length === 1 ? 'dream' : 'dreams'} recorded</span>
+              )}
             </p>
           </div>
           <Button
@@ -194,6 +167,30 @@ export default function Dreams() {
             <Plus className="w-6 h-6" />
           </Button>
         </div>
+
+        {/* Upgrade CTA when free tier limit reached */}
+        {stats && !stats.isPremium && stats.count >= (stats.limit || 3) && (
+          <Card className="p-4 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+            <div className="flex items-start gap-3">
+              <Crown className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm mb-1">You've reached your 3 dream limit</h3>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Upgrade to Premium for unlimited dream storage, Deep Dive analysis, and pattern tracking.
+                </p>
+                <Button
+                  size="sm"
+                  onClick={() => setLocation("/subscribe")}
+                  data-testid="button-upgrade-dreams"
+                  className="h-8"
+                >
+                  <Crown className="w-3 h-3 mr-1" />
+                  Upgrade Now
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
 
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />

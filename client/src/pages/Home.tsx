@@ -200,7 +200,7 @@ export default function Home() {
      * - Save to localStorage for non-premium users (temporary)
      * - Offer "Save Dream" action for premium users
      */
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       // Console logging with emoji for easy visual scanning in logs
       console.log("✨ Interpretation received:", data);
       
@@ -212,12 +212,29 @@ export default function Home() {
         dreamText, // Include original dream text for display
       };
       
-      // User feedback: Success notification
-      toast({
-        title: "Dream Interpreted!",
-        description: `Confidence: ${data.confidence}% • ${data.themes?.length || 0} themes identified`,
-        duration: 5000, // 5 seconds (long enough to comprehend)
-      });
+      // Check if free tier limit reached
+      if (data.limitReached) {
+        toast({
+          title: "Dream Interpreted! (Not Saved)",
+          description: data.message || "You've reached your 3 dream limit. Upgrade for unlimited storage!",
+          variant: "default",
+          duration: 7000,
+        });
+      } else if (data.saved === false) {
+        // Save failed but interpretation succeeded
+        toast({
+          title: "Dream Interpreted!",
+          description: `Confidence: ${data.confidence}% • Note: Dream not saved`,
+          duration: 5000,
+        });
+      } else {
+        // Standard success with save
+        toast({
+          title: "Dream Interpreted & Saved!",
+          description: `Confidence: ${data.confidence}% • ${data.themes?.length || 0} themes identified`,
+          duration: 5000,
+        });
+      }
       
       // Tactile feedback: Success vibration pattern
       haptics.success();

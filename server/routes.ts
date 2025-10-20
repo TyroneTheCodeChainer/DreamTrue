@@ -208,24 +208,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       /**
-       * Success Response
+       * Auto-Save for All Users (with Free Tier Limits)
        * 
-       * Return structured interpretation directly to client.
+       * NEW FEATURE: Save dreams + interpretations for ALL users
+       * - Free users: Max 3 dreams (creates habit loop before paywall)
+       * - Premium users: Unlimited dreams
        * 
-       * Response Format:
-       * - JSON object (Content-Type: application/json auto-set by Express)
-       * - 200 OK status (default for res.json())
-       * - Matches InterpretationResult interface from AI service
+       * Why auto-save?
+       * - Users invest emotional labor in describing dreams
+       * - Losing data creates frustration and abandonment
+       * - Seeing past dreams encourages return visits
+       * - Creates upgrade urgency when approaching limit
+       */
+      if (req.isAuthenticated()) {
+        try {
+          const userId = req.user.claims.sub;
+          const user = await storage.getUser(userId);
+          
+          // Check free tier limit
+          if (!user?.isPremium) {
+            const existingDreams = await storage.getUserDreams(userId);
+            if (existingDreams.length >= 3) {
+              // Don't block interpretation - just don't save
+              // Return success with warning flag
+              return res.json({
+                ...interpretation,
+                saved: false,
+                limitReached: true,
+                message: "You've saved 3 dreams. Upgrade for unlimited storage!"
+              });
+            }
+          }
+          
+          // Save dream
+          const dream = await storage.createDream({
+            userId,
+            content: dreamText,
+            mood: context.mood || null,
+            stressLevel: context.stressLevel || null,
+          });
+          
+          // Save interpretation linked to dream
+          await storage.createInterpretation({
+            userId,
+            dreamId: dream.id,
+            analysisType: analysisType || 'quick_insight',
+            interpretation: interpretation.interpretation,
+            symbols: interpretation.symbols || [],
+            emotions: interpretation.emotions || [],
+            themes: interpretation.themes || [],
+            confidence: interpretation.confidence || 0,
+          });
+          
+          return res.json({
+            ...interpretation,
+            saved: true,
+            dreamId: dream.id,
+          });
+        } catch (saveError) {
+          // Log but don't fail - interpretation still succeeded
+          console.error("Failed to auto-save dream:", saveError);
+          // Return interpretation without saving
+          return res.json({
+            ...interpretation,
+            saved: false,
+          });
+        }
+      }
+      
+      /**
+       * Success Response (Unauthenticated Users)
        * 
-       * Frontend Integration:
-       * - React Query mutation automatically parses JSON
-       * - TypeScript type safety via shared types
-       * - No transformation needed (direct pass-through)
-       * 
-       * Why no additional processing?
-       * - AI service already validated/structured the data
-       * - Keep routes thin (business logic in services)
-       * - Immutable response (no side effects)
+       * Return interpretation without saving
+       * Unauthenticated users get ephemeral interpretations
        */
       res.json(interpretation);
       
@@ -286,17 +341,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/dreams", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
       
-      if (!user?.isPremium) {
-        return res.json([]); // Free users have no stored dreams
-      }
-
+      // NEW: All users can access their saved dreams (free tier: max 3)
       const dreams = await storage.getUserDreams(userId);
       res.json(dreams);
     } catch (error) {
       console.error("Error fetching dreams:", error);
       res.status(500).json({ message: "Failed to fetch dreams" });
+    }
+  });
+
+  // Dream stats endpoint (for showing "2/3 dreams saved" indicator)
+  app.get("/api/dreams/stats", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      const dreams = await storage.getUserDreams(userId);
+      
+      res.json({
+        count: dreams.length,
+        limit: user?.isPremium ? null : 3, // null = unlimited for premium
+        isPremium: user?.isPremium || false,
+      });
+    } catch (error) {
+      console.error("Error fetching dream stats:", error);
+      res.status(500).json({ message: "Failed to fetch dream stats" });
     }
   });
 
