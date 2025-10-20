@@ -70,6 +70,7 @@ const SubscribeForm = () => {
 
 export default function Subscribe() {
   const [clientSecret, setClientSecret] = useState("");
+  const [isConfigMissing, setIsConfigMissing] = useState(false);
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -96,40 +97,73 @@ export default function Subscribe() {
     // Create subscription as soon as the page loads
     if (isAuthenticated && !isLoading) {
       apiRequest("POST", "/api/create-subscription")
-        .then((data: any) => {
-          // apiRequest already returns parsed JSON, not raw Response
+        .then(async (res) => {
+          const data = await res.json();
           if (data.clientSecret) {
             setClientSecret(data.clientSecret);
           } else if (data.errorType === 'config_missing') {
-            // Stripe not configured - show helpful error
-            toast({
-              title: "Subscription Unavailable",
-              description: "Stripe payment system is not yet configured. Please contact support.",
-              variant: "destructive",
-              duration: 10000,
-            });
-            setTimeout(() => setLocation("/"), 2000);
+            // Stripe not configured - show friendly message
+            setIsConfigMissing(true);
           }
         })
         .catch((error) => {
           console.error("Failed to create subscription:", error);
           
-          // Error message from apiRequest
-          const errorMessage = error.message || "Unable to set up subscription. Please try again later.";
-          
-          toast({
-            title: "Subscription Error",
-            description: errorMessage,
-            variant: "destructive",
-            duration: 8000,
-          });
-          
-          // Redirect back to home after showing error
-          setTimeout(() => setLocation("/"), 3000);
+          // Parse error message to check if it's a config issue
+          const errorMsg = error.message || "";
+          if (errorMsg.includes("config_missing") || errorMsg.includes("STRIPE_PRICE_ID")) {
+            // Config error - show friendly UI
+            setIsConfigMissing(true);
+          } else {
+            // Other errors - show user-friendly message
+            toast({
+              title: "Unable to Load Subscription",
+              description: "We're having trouble setting up your subscription. Please try again later or contact support.",
+              variant: "destructive",
+              duration: 8000,
+            });
+            setTimeout(() => setLocation("/"), 3000);
+          }
         });
     }
   }, [user, setLocation, isAuthenticated, isLoading, toast]);
 
+  // Show friendly message if Stripe isn't configured
+  if (isConfigMissing) {
+    return (
+      <div className="min-h-screen bg-background p-4 pt-safe pb-safe">
+        <div className="max-w-2xl mx-auto py-8">
+          <div className="text-center mb-8">
+            <div className="inline-block p-3 bg-primary/10 rounded-full mb-4">
+              <Moon className="w-10 h-10 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold mb-2">Premium Coming Soon</h1>
+            <p className="text-muted-foreground">
+              We're setting up premium subscriptions and will notify you when they're available.
+            </p>
+          </div>
+
+          <Card className="p-8 text-center">
+            <p className="text-lg mb-4">
+              Premium features are currently being configured. Check back soon!
+            </p>
+            <p className="text-sm text-muted-foreground mb-6">
+              In the meantime, enjoy unlimited Quick Insight interpretations completely free.
+            </p>
+            <Button 
+              onClick={() => setLocation("/")}
+              className="bg-gradient-to-r from-primary to-[#764ba2]"
+              data-testid="button-back-home"
+            >
+              Back to Home
+            </Button>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while fetching client secret
   if (!clientSecret) {
     return (
       <div className="h-screen flex items-center justify-center">
