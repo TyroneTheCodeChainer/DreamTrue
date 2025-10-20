@@ -12,6 +12,57 @@ The app features two interpretation modes:
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (October 20, 2025)
+
+### Frontend Enhancements
+1. **Character Counter & Validation** (client/src/pages/Home.tsx)
+   - Real-time character counter for dream input (3,500 char limit)
+   - Three-state feedback system:
+     - Normal (0-3000): Standard count display
+     - Warning (3001-3500): "⚡ Approaching limit" message
+     - Error (3501+): "⚠️ Too long" message with submit disabled
+   - Clear button for quick text reset
+   - Prevents over-limit submissions at UI level
+
+2. **PWA Service Worker** (public/sw.js + client/src/main.tsx)
+   - Production-ready Progressive Web App capabilities
+   - Offline caching strategies:
+     - Static assets: Cache-first (fast loading)
+     - API calls: Network-first (fresh data)
+     - HTML pages: Network-first with cache fallback
+   - Cache versioning for smooth updates
+   - Production-only registration (avoids dev HMR conflicts)
+   - Extensive educational comments (300+ lines)
+
+### Backend Bug Fixes
+3. **JSON Truncation Bug Fixed** (server/routes.ts, server/ai-interpreter.ts)
+   - Issue: Dreams >2000 chars caused token exhaustion → truncated JSON responses
+   - Solution: 
+     - Reduced max dream length: 5000 → 3500 chars
+     - Increased Quick Insight tokens: 1000 → 1600
+   - Token budget safety margin: ~325 tokens
+   - Validated via E2E regression test (3400 char dream processed successfully)
+
+4. **JSON Control Character Bug Fixed** (server/ai-interpreter.ts)
+   - Issue: Claude API returns unescaped newlines/tabs in JSON strings
+   - Solution: Smart sanitization with backslash-counting quote detection
+   - Handles escaped quotes correctly (e.g., "He said \"hello\"")
+
+5. **Stripe Error Handling** (server/routes.ts, Subscribe.tsx)
+   - Added STRIPE_PRICE_ID validation with helpful error messages
+   - Fixed double JSON parsing regression in Subscribe.tsx
+
+### Testing & Validation
+- Comprehensive E2E testing completed via Playwright
+- All critical user flows validated:
+  - Voice recording + AI interpretation
+  - Premium gating (frontend + backend)
+  - Dream persistence + journal
+  - Input validation (min 10, max 3500 chars)
+  - Error handling & edge cases
+  - Character counter states
+  - PWA offline capabilities (production build)
+
 ## System Architecture
 
 ### Frontend Architecture
