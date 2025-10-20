@@ -184,6 +184,9 @@ export default function Subscribe() {
           <p className="text-muted-foreground">
             Unlock Deep Dive analysis and persistent dream storage
           </p>
+          <p className="text-sm text-primary mt-3 font-medium">
+            Join 500+ users exploring their dreams with AI
+          </p>
         </div>
 
         {/* Premium Features */}
@@ -307,11 +310,28 @@ export default function Subscribe() {
           </Elements>
         </Card>
 
-        {/* Privacy Note */}
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          <Shield className="w-4 h-4 inline mr-1" />
-          Your payment information is secure and encrypted
-        </p>
+        {/* Privacy Note & Trust Signals */}
+        <div className="mt-6 space-y-4">
+          <p className="text-center text-sm text-muted-foreground">
+            <Shield className="w-4 h-4 inline mr-1" />
+            Your payment information is secure and encrypted
+          </p>
+          
+          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Check className="w-3 h-3 text-primary" />
+              <span>Cancel anytime</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Check className="w-3 h-3 text-primary" />
+              <span>30-day guarantee</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Check className="w-3 h-3 text-primary" />
+              <span>Instant access</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
