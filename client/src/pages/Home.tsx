@@ -418,13 +418,45 @@ export default function Home() {
 
         {/* Text Input - Secondary, Clean */}
         <div className="bg-card border border-card-border rounded-2xl p-5 space-y-4 shadow-lg">
-          <Textarea
-            value={dreamText}
-            onChange={(e) => setDreamText(e.target.value)}
-            placeholder="What did you dream about? (symbols, emotions, key moments...)"
-            className="min-h-[120px] text-base resize-none border-0 focus-visible:ring-1 bg-background"
-            data-testid="input-dream"
-          />
+          <div className="space-y-2">
+            <Textarea
+              value={dreamText}
+              onChange={(e) => setDreamText(e.target.value)}
+              placeholder="What did you dream about? (symbols, emotions, key moments...)"
+              className="min-h-[120px] text-base resize-none border-0 focus-visible:ring-1 bg-background"
+              data-testid="input-dream"
+            />
+            
+            {/* Character Counter with Validation Feedback */}
+            <div className="flex items-center justify-between text-xs">
+              <span 
+                className={`
+                  ${dreamText.length > 3500 ? 'text-destructive font-medium' : 
+                    dreamText.length > 3000 ? 'text-warning font-medium' : 
+                    'text-muted-foreground'}
+                `}
+                data-testid="text-char-count"
+              >
+                {dreamText.length > 3500 ? (
+                  <>⚠️ Too long - please shorten to 3,500 characters or less</>
+                ) : dreamText.length > 3000 ? (
+                  <>⚡ Approaching limit ({dreamText.length} / 3,500)</>
+                ) : (
+                  <>{dreamText.length} / 3,500 characters</>
+                )}
+              </span>
+              {dreamText.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setDreamText('')}
+                  className="text-muted-foreground hover:text-foreground"
+                  data-testid="button-clear-dream"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
           
           {/* Optional Context - Collapsed by Default */}
           <div>
@@ -532,7 +564,12 @@ export default function Home() {
 
           <Button
             onClick={handleSubmit}
-            disabled={!dreamText.trim() || interpretMutation.isPending}
+            disabled={
+              !dreamText.trim() || 
+              dreamText.length < 10 || 
+              dreamText.length > 3500 || 
+              interpretMutation.isPending
+            }
             data-testid="button-analyze"
             className="w-full h-12 bg-gradient-to-r from-primary via-secondary to-primary hover:opacity-90 font-medium"
           >
