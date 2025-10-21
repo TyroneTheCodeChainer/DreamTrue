@@ -14,7 +14,7 @@
  * 
  * Architecture Decisions:
  * - Direct Node.js integration (avoiding Python microservice complexity)
- * - Uses REPLIT_ANTHROPIC_KEY for seamless Replit integration
+ * - Uses REPLIT_ANTHROPIC_KEY_2 for seamless Replit integration
  * - Fallback to ANTHROPIC_API_KEY for local development flexibility
  * - Temperature 0.7 balances creativity with consistency
  * - Model: claude-3-5-sonnet-20241022 (latest stable Sonnet version)
@@ -26,7 +26,7 @@ import Anthropic from '@anthropic-ai/sdk';
  * API Key Configuration
  * 
  * Priority order:
- * 1. REPLIT_ANTHROPIC_KEY - Replit's managed secret (production)
+ * 1. REPLIT_ANTHROPIC_KEY_2 - Replit's managed secret (production)
  * 2. ANTHROPIC_API_KEY - Manual configuration (development/testing)
  * 
  * This dual-key approach ensures:
@@ -34,16 +34,16 @@ import Anthropic from '@anthropic-ai/sdk';
  * - Local development compatibility
  * - Easy secret rotation without code changes
  */
-const apiKey = process.env.REPLIT_ANTHROPIC_KEY || process.env.ANTHROPIC_API_KEY;
+const apiKey = process.env.REPLIT_ANTHROPIC_KEY_2 || process.env.ANTHROPIC_API_KEY;
 
 // Fail-fast validation: Application cannot function without API credentials
 if (!apiKey) {
-  console.error('CRITICAL: No Anthropic API key found! Check REPLIT_ANTHROPIC_KEY or ANTHROPIC_API_KEY');
+  console.error('CRITICAL: No Anthropic API key found! Check REPLIT_ANTHROPIC_KEY_2 or ANTHROPIC_API_KEY');
   throw new Error('Missing required secret: Anthropic API key');
 }
 
 // Startup logging for deployment verification (never logs actual key value)
-console.log('AI Interpreter initialized with API key:', apiKey ? '✓ Present (using REPLIT_ANTHROPIC_KEY)' : '✗ Missing');
+console.log('AI Interpreter initialized with API key:', apiKey ? '✓ Present (using REPLIT_ANTHROPIC_KEY_2)' : '✗ Missing');
 
 /**
  * Anthropic Client Instance

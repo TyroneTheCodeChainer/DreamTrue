@@ -185,8 +185,8 @@ if (analysisType === 'deep_dive' && !user?.isPremium) {
 
 **API Key Configuration**:
 ```typescript
-// Priority: REPLIT_ANTHROPIC_KEY > ANTHROPIC_API_KEY
-const apiKey = process.env.REPLIT_ANTHROPIC_KEY || process.env.ANTHROPIC_API_KEY;
+// Priority: REPLIT_ANTHROPIC_KEY_2 > ANTHROPIC_API_KEY
+const apiKey = process.env.REPLIT_ANTHROPIC_KEY_2 || process.env.ANTHROPIC_API_KEY;
 ```
 
 **Claude Model Configuration**:
@@ -314,7 +314,7 @@ if (analysisType === 'deep_dive' && !user?.isPremium) {
 console.log('AI Interpreter initialized with API key:', apiKey ? '✓ Present' : '✗ Missing');
 
 // Environment variable hierarchy
-const apiKey = process.env.REPLIT_ANTHROPIC_KEY || process.env.ANTHROPIC_API_KEY;
+const apiKey = process.env.REPLIT_ANTHROPIC_KEY_2 || process.env.ANTHROPIC_API_KEY;
 ```
 
 ---
@@ -387,8 +387,8 @@ console.error('AI interpretation error:', {
 ### Environment Variables Required
 ```bash
 # Anthropic API (priority order)
-REPLIT_ANTHROPIC_KEY=sk-ant-api03-...   # Preferred
-ANTHROPIC_API_KEY=sk-ant-api03-...      # Fallback
+REPLIT_ANTHROPIC_KEY_2=sk-ant-api03-...   # Preferred
+ANTHROPIC_API_KEY=sk-ant-api03-...        # Fallback
 
 # Database (auto-configured by Replit)
 DATABASE_URL=postgresql://...
@@ -405,7 +405,7 @@ VITE_STRIPE_PUBLIC_KEY=pk_live_...
 ### Startup Validation
 ```bash
 # Server logs should show:
-✓ AI Interpreter initialized with API key: ✓ Present (using REPLIT_ANTHROPIC_KEY)
+✓ AI Interpreter initialized with API key: ✓ Present (using REPLIT_ANTHROPIC_KEY_2)
 ✓ [express] serving on port 5000
 ```
 
@@ -447,7 +447,7 @@ VITE_STRIPE_PUBLIC_KEY=pk_live_...
 **Issue**: "AI service authentication failed"
 ```bash
 # Solution: Check API key configuration
-echo $REPLIT_ANTHROPIC_KEY
+echo $REPLIT_ANTHROPIC_KEY_2
 # Verify key starts with sk-ant-api03-
 # Rotate key in Anthropic console if invalid
 ```
