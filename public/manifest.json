@@ -1,7 +1,7 @@
 {
   "name": "DreamTrue - Understand Your Dreams",
   "short_name": "DreamTrue",
-  "description": "Real insights. Rooted in research. AI trained on peer-reviewed psychology and sleep research.",
+  "description": "Real insights, rooted in research-based AI.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1429",

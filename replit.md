@@ -2,7 +2,9 @@
 
 ## Overview
 
-DreamTrue is a mobile-first Progressive Web App (PWA) that provides AI-powered dream interpretation using research-backed analysis. Unlike mystical dream dictionaries, DreamTrue uses AI trained on thousands of peer-reviewed psychology and sleep research studies to give you explanations grounded in evidence—not superstition.
+DreamTrue is a mobile-first Progressive Web App (PWA) that provides AI-powered dream interpretation using research-backed analysis.
+
+**Bio**: DreamTrue interprets your dreams with AI grounded in real research, not myths.
 
 **Tagline**: Real insights. Rooted in research. The application combines modern web technologies with advanced AI systems to help users understand their dreams through scientific insights, pattern recognition, and personalized analysis.
 

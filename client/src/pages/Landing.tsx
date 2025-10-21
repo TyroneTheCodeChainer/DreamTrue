@@ -19,12 +19,8 @@ export default function Landing() {
               Understand Your Dreams
             </h1>
             
-            <p className="text-lg text-primary font-semibold mb-4">
-              Real insights. Rooted in research.
-            </p>
-            
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Unlike mystical dream dictionaries, DreamTrue uses AI trained on thousands of peer-reviewed psychology and sleep research studies to give you explanations grounded in evidence—not superstition.
+              DreamTrue interprets your dreams with AI grounded in real research, not myths.
             </p>
             
             <Button
