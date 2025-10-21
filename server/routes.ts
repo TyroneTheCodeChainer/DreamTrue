@@ -517,6 +517,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expand: ['latest_invoice.payment_intent'],
       });
 
+      // Extract client secret from payment intent
+      let clientSecret = (subscription.latest_invoice as any)?.payment_intent?.client_secret;
+      
+      // If no client secret, manually create a payment intent for the invoice
+      if (!clientSecret && subscription.latest_invoice) {
+        const invoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
+        if (invoice && !(invoice as any).payment_intent) {
+          const paymentIntent = await stripe.paymentIntents.create({
+            amount: invoice.amount_due,
+            currency: 'usd',
+            customer: customer.id,
+            metadata: {
+              subscription_id: subscription.id,
+              invoice_id: invoice.id,
+            },
+          });
+          clientSecret = paymentIntent.client_secret;
+        }
+      }
+
       // SECURITY FIX: Only store Stripe IDs, DO NOT set isPremium yet
       // Premium status will be activated via Stripe webhook after payment confirmation
       const [updatedUser] = await db
@@ -532,7 +552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         subscriptionId: subscription.id,
-        clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
+        clientSecret,
       });
     } catch (error: any) {
       console.error("Error creating subscription:", error);
