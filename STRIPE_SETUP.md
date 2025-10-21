@@ -11,8 +11,8 @@ Your app is ready, but you need to configure Stripe before users can subscribe t
 1. **Log in to Stripe Dashboard**: https://dashboard.stripe.com/test/products
 2. **Create a Product**:
    - Click "+ Add product"
-   - Name: "DreamLens Premium"
-   - Description: "Unlock Deep Dive analysis and persistent dream storage"
+   - Name: "DreamTrue Premium"
+   - Description: "Unlock Deep Dive analysis and unlimited dream storage. Real insights rooted in research."
    
 3. **Add Pricing**:
    - Pricing model: "Standard pricing"
@@ -120,7 +120,7 @@ Webhooks are **critical for security** - they prevent users from getting premium
 
 ## 📝 Summary Checklist
 
-- [ ] Created product "DreamLens Premium" in Stripe Dashboard
+- [ ] Created product "DreamTrue Premium" in Stripe Dashboard
 - [ ] Created monthly price ($9.99)
 - [ ] Copied Price ID and updated `server/routes.ts` line 203
 - [ ] Added webhook endpoint: `https://[your-app]/api/stripe/webhook`

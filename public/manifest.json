@@ -1,7 +1,7 @@
 {
-  "name": "DreamLens - AI Dream Interpreter",
-  "short_name": "DreamLens",
-  "description": "AI-powered dream interpretation using research-backed analysis",
+  "name": "DreamTrue - Understand Your Dreams",
+  "short_name": "DreamTrue",
+  "description": "Real insights. Rooted in research. AI trained on peer-reviewed psychology and sleep research.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1429",

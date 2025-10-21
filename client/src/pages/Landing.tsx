@@ -15,12 +15,16 @@ export default function Landing() {
               <Moon className="w-12 h-12 text-primary" />
             </div>
             
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
               Understand Your Dreams
             </h1>
             
+            <p className="text-lg text-primary font-semibold mb-4">
+              Real insights. Rooted in research.
+            </p>
+            
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Capture your dreams with voice, discover what they mean, and unlock patterns in your subconscious — all from your bedside.
+              Unlike mystical dream dictionaries, DreamTrue uses AI trained on thousands of peer-reviewed psychology and sleep research studies to give you explanations grounded in evidence—not superstition.
             </p>
             
             <Button

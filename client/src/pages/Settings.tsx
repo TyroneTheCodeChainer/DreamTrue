@@ -198,7 +198,7 @@ export default function Settings() {
             data-testid="button-about"
           >
             <Info className="w-6 h-6" />
-            <span>About DreamLens</span>
+            <span>About DreamTrue</span>
           </Button>
         </Card>
 
@@ -219,7 +219,7 @@ export default function Settings() {
 
         <Card className="p-5 bg-muted/50 text-center">
           <p className="text-body-sm text-muted-foreground">
-            DreamLens v1.0.0
+            DreamTrue v1.0.0
           </p>
           <p className="text-sm text-muted-foreground mt-1">
             Research-backed AI dream interpretation

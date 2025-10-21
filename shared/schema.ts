@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- * DATABASE SCHEMA DEFINITION - DreamLens Application
+ * DATABASE SCHEMA DEFINITION - DreamTrue Application
  * =============================================================================
  * 
  * This file defines the structure of our PostgreSQL database using Drizzle ORM.

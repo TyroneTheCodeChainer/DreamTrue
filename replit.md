@@ -1,8 +1,10 @@
-# DreamLens - AI Dream Interpreter
+# DreamTrue - Understand Your Dreams
 
 ## Overview
 
-DreamLens is a mobile-first Progressive Web App (PWA) that provides AI-powered dream interpretation using research-backed RAG (Retrieval-Augmented Generation) analysis. The application combines modern web technologies with advanced AI systems to help users understand their dreams through scientific insights, pattern recognition, and personalized analysis.
+DreamTrue is a mobile-first Progressive Web App (PWA) that provides AI-powered dream interpretation using research-backed analysis. Unlike mystical dream dictionaries, DreamTrue uses AI trained on thousands of peer-reviewed psychology and sleep research studies to give you explanations grounded in evidence—not superstition.
+
+**Tagline**: Real insights. Rooted in research. The application combines modern web technologies with advanced AI systems to help users understand their dreams through scientific insights, pattern recognition, and personalized analysis.
 
 The app features two interpretation modes:
 - **Quick RAG**: Fast interpretation using vector database retrieval and LLM generation
