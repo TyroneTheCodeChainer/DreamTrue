@@ -120,8 +120,8 @@ export default function Landing() {
               
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold mb-2">Premium</h3>
-                <p className="text-4xl font-bold">$9.99</p>
-                <p className="text-muted-foreground mt-2">per month</p>
+                <p className="text-4xl font-bold">$9.95</p>
+                <p className="text-muted-foreground mt-2">per month or $79.95/year</p>
               </div>
               
               <ul className="space-y-3 mb-8">
@@ -168,6 +168,49 @@ export default function Landing() {
           Get Started Now
         </Button>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-border/40 bg-background/95 backdrop-blur">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Moon className="w-5 h-5 text-primary" />
+              <span className="font-medium">DreamTrue</span>
+              <span className="hidden md:inline">· Real insights. Rooted in research.</span>
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-muted-foreground">
+              <a 
+                href="/terms-of-service.html" 
+                target="_blank"
+                className="hover:text-primary transition-colors"
+                data-testid="link-terms"
+              >
+                Terms of Service
+              </a>
+              <a 
+                href="/privacy-policy.html" 
+                target="_blank"
+                className="hover:text-primary transition-colors"
+                data-testid="link-privacy"
+              >
+                Privacy Policy
+              </a>
+              <a 
+                href="mailto:support@dreamtrue.app"
+                className="hover:text-primary transition-colors"
+                data-testid="link-support"
+              >
+                Support
+              </a>
+            </div>
+          </div>
+          
+          <div className="text-center text-xs text-muted-foreground mt-4">
+            © 2025 DreamTrue. Not a substitute for professional therapy.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
