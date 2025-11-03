@@ -249,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           
           // Save interpretation linked to dream
-          await storage.createInterpretation({
+          const savedInterpretation = await storage.createInterpretation({
             userId,
             dreamId: dream.id,
             analysisType: analysisType || 'quick_insight',
@@ -262,6 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           return res.json({
             ...interpretation,
+            id: savedInterpretation.id, // Include interpretation ID for feedback linking
             saved: true,
             dreamId: dream.id,
           });

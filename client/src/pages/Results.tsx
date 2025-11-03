@@ -28,8 +28,10 @@ import { useToast } from "@/hooks/use-toast";
 import { haptics } from "@/lib/haptics";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import FeedbackForm from "@/components/FeedbackForm";
 
 interface InterpretationData {
+  id?: string; // Interpretation ID for feedback linking
   interpretation: string;
   symbols: string[];
   emotions: string[];
@@ -37,6 +39,7 @@ interface InterpretationData {
   confidence: number;
   analysisType: 'quick_insight' | 'deep_dive';
   dreamText?: string;
+  saved?: boolean; // Whether interpretation was saved to database
 }
 
 export default function Results() {
@@ -328,6 +331,13 @@ export default function Results() {
         )}
 
         <Separator className="my-8" />
+
+        {/* User Feedback Section */}
+        {interpretation.id && (
+          <div className="mb-8">
+            <FeedbackForm interpretationId={interpretation.id} />
+          </div>
+        )}
 
         {/* Call to Action */}
         {!isPremium && (
