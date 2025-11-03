@@ -3,12 +3,15 @@ import {
   users,
   dreams,
   interpretations,
+  errors,
   type User,
   type UpsertUser,
   type Dream,
   type InsertDream,
   type Interpretation,
   type InsertInterpretation,
+  type InsertError,
+  type ErrorLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -32,6 +35,11 @@ export interface IStorage {
   getUserInterpretations(userId: string): Promise<Interpretation[]>;
   getDreamInterpretations(dreamId: string): Promise<Interpretation[]>;
   getInterpretation(id: string): Promise<Interpretation | undefined>;
+  
+  // Error logging operations (AIE8 Dimension 7: Monitoring)
+  logError(error: InsertError): Promise<ErrorLog>;
+  getRecentErrors(limit?: number): Promise<ErrorLog[]>;
+  getUserErrors(userId: string, limit?: number): Promise<ErrorLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -140,6 +148,33 @@ export class DatabaseStorage implements IStorage {
       .from(interpretations)
       .where(eq(interpretations.id, id));
     return interpretation;
+  }
+
+  // Error logging operations (AIE8 Dimension 7: Monitoring)
+  
+  async logError(errorData: InsertError): Promise<ErrorLog> {
+    const [error] = await db
+      .insert(errors)
+      .values(errorData)
+      .returning();
+    return error;
+  }
+
+  async getRecentErrors(limit: number = 100): Promise<ErrorLog[]> {
+    return await db
+      .select()
+      .from(errors)
+      .orderBy(desc(errors.createdAt))
+      .limit(limit);
+  }
+
+  async getUserErrors(userId: string, limit: number = 100): Promise<ErrorLog[]> {
+    return await db
+      .select()
+      .from(errors)
+      .where(eq(errors.userId, userId))
+      .orderBy(desc(errors.createdAt))
+      .limit(limit);
   }
 }
 

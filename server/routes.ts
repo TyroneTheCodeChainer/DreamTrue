@@ -248,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             stressLevel: context.stressLevel || null,
           });
           
-          // Save interpretation linked to dream
+          // Save interpretation linked to dream (with monitoring metrics)
           const savedInterpretation = await storage.createInterpretation({
             userId,
             dreamId: dream.id,
@@ -258,6 +258,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             emotions: interpretation.emotions || [],
             themes: interpretation.themes || [],
             confidence: interpretation.confidence || 0,
+            // AIE8 Dimension 7: Store monitoring metrics for performance tracking
+            tokensUsed: interpretation.metrics.tokensUsed,
+            latencyMs: interpretation.metrics.latencyMs,
+            costUsd: interpretation.metrics.costUsd,
+            modelVersion: interpretation.metrics.modelVersion,
+            status: interpretation.metrics.status,
+            errorMessage: interpretation.metrics.errorMessage,
           });
           
           return res.json({
@@ -287,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error: any) {
       /**
-       * Error Handling and Logging
+       * Error Handling and Logging (AIE8 Dimension 7: Monitoring)
        * 
        * Centralized error handling for all failure scenarios:
        * - AI service errors (authentication, rate limits, parsing)
@@ -295,27 +302,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
        * - Network errors (Anthropic API unreachable)
        * - Unexpected exceptions (bugs)
        * 
-       * Logging Strategy:
-       * - Log to console (captured by Replit logs)
-       * - Include full error object (stack trace for debugging)
-       * - Never log user PII or dream content (privacy)
+       * Enhanced Logging Strategy:
+       * 1. Console logging (captured by Replit logs)
+       * 2. Database error logging (structured error table for analytics)
+       * 3. Full error context (stack trace, request details)
+       * 4. Privacy-safe (never log dream content or PII)
        * 
-       * Client Response:
-       * - 500 Internal Server Error (generic server failure)
-       * - Include error message if available (helps user understand)
-       * - Fallback to generic message (prevents undefined in UI)
-       * 
-       * Security Note:
-       * - Don't expose stack traces to client (security risk)
-       * - error.message is safe (controlled by our code/Anthropic)
-       * - Detailed logs available server-side for debugging
-       * 
-       * Monitoring Recommendations:
+       * Monitoring Benefits:
        * - Track 500 error rate (indicator of AI service health)
        * - Alert on sustained elevated errors (service degradation)
-       * - Log analysis for common failure patterns (optimize retry logic)
+       * - Pattern analysis (which errors are most common?)
+       * - User impact tracking (which users experiencing issues?)
        */
       console.error("Interpretation error:", error);
+      
+      // Log error to database for structured monitoring (AIE8 Dimension 7)
+      try {
+        const userId = req.user?.claims?.sub || null;
+        await storage.logError({
+          userId,
+          errorType: error.status === 401 ? 'AuthenticationError' : 
+                     error.status === 429 ? 'RateLimitError' :
+                     error.type === 'api_error' ? 'APIError' :
+                     'InterpretationError',
+          errorMessage: error.message || 'Failed to interpret dream',
+          stackTrace: error.stack || null,
+          context: {
+            endpoint: '/api/interpret',
+            analysisType: req.body?.analysisType || 'quick_insight',
+            dreamLength: req.body?.dreamText?.length || 0,
+            errorStatus: error.status || 500,
+            errorType: error.type || 'unknown'
+          }
+        });
+      } catch (logError) {
+        // Don't let error logging failure break the response
+        console.error("Failed to log error to database:", logError);
+      }
+      
       res.status(500).json({ message: error.message || "Failed to interpret dream" });
     }
   });
