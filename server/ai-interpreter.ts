@@ -17,7 +17,7 @@
  * - Uses REPLIT_ANTHROPIC_KEY_2 for seamless Replit integration
  * - Fallback to ANTHROPIC_API_KEY for local development flexibility
  * - Temperature 0.7 balances creativity with consistency
- * - Model: claude-3-5-sonnet-20241022 (latest stable Sonnet version)
+ * - Model: claude-sonnet-4-5-20250929 (latest Claude Sonnet 4.5 - exceptional coding and agentic performance)
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -86,7 +86,7 @@ interface DreamContext {
  * @property tokensUsed - Total tokens consumed (input + output)
  * @property latencyMs - End-to-end response time in milliseconds
  * @property costUsd - Calculated API cost in USD (based on token usage)
- * @property modelVersion - Claude model identifier (e.g., "claude-3-5-sonnet-20241022")
+ * @property modelVersion - Claude model identifier (e.g., "claude-sonnet-4-5-20250929")
  * @property status - Request outcome: "success", "error", or "timeout"
  * @property errorMessage - Error details if status !== "success" (null otherwise)
  */
@@ -257,7 +257,7 @@ Provide your analysis in JSON format with these fields:
 The confidence score should be 0-100 based on dream clarity and detail.`;
 
   // Model version constant for metrics tracking
-  const MODEL_VERSION = 'claude-3-5-sonnet-20241022';
+  const MODEL_VERSION = 'claude-sonnet-4-5-20250929';
   
   // Start timing for latency measurement (AIE8 Dimension 7: Monitoring)
   const startTime = Date.now();
@@ -268,8 +268,9 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
      * 
      * Configuration breakdown:
      * 
-     * @param model - claude-3-5-sonnet-20241022
-     *   - Latest stable Sonnet version (as of Oct 2024)
+     * @param model - claude-sonnet-4-5-20250929
+     *   - Latest Claude Sonnet 4.5 version (released Sept 2025)
+     *   - Exceptional coding and agentic performance
      *   - Excellent balance of speed, cost, and quality
      *   - Sonnet chosen over Opus for 3am use case (speed matters)
      *   - Sonnet chosen over Haiku for quality (dream interpretation needs depth)
@@ -317,7 +318,7 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
      * - Conservative limits prevent any truncation risk
      */
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: analysisType === 'deep_dive' ? 2000 : 1600,
       temperature: 0.7,
       system: systemPrompt,
