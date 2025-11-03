@@ -583,6 +583,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Error creating subscription:", error);
+      
+      // Improved error handling for Stripe-specific errors
+      if (error.type === 'StripeInvalidRequestError') {
+        // Invalid price ID or Stripe configuration issue
+        if (error.message?.includes('No such price')) {
+          return res.status(500).json({ 
+            message: "Stripe subscription configuration error. The price ID is invalid or not set up correctly. Please contact support.",
+            errorType: "stripe_config_error",
+            devMessage: `STRIPE_PRICE_ID (${process.env.STRIPE_PRICE_ID}) does not exist in Stripe. Create a valid price in Stripe Dashboard or update environment variable.`
+          });
+        }
+        return res.status(400).json({ 
+          message: "Stripe configuration error: " + error.message,
+          errorType: "stripe_error"
+        });
+      }
+      
+      // Generic error fallback
       res.status(400).json({ message: error.message || "Failed to create subscription" });
     }
   });

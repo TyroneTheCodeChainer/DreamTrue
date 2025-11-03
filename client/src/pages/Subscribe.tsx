@@ -101,18 +101,40 @@ export default function Subscribe() {
           const data = await res.json();
           if (data.clientSecret) {
             setClientSecret(data.clientSecret);
-          } else if (data.errorType === 'config_missing') {
-            // Stripe not configured - show friendly message
+          } else if (data.errorType === 'config_missing' || data.errorType === 'stripe_config_error') {
+            // Stripe not configured or invalid config - show friendly message
+            console.warn("Stripe configuration issue:", data.devMessage || data.message);
             setIsConfigMissing(true);
           }
         })
-        .catch((error) => {
+        .catch(async (error) => {
           console.error("Failed to create subscription:", error);
           
-          // Parse error message to check if it's a config issue
-          const errorMsg = error.message || "";
-          if (errorMsg.includes("config_missing") || errorMsg.includes("STRIPE_PRICE_ID")) {
+          // Try to parse response body for error type
+          let errorType = null;
+          let errorMessage = "";
+          try {
+            // Check if error.response exists and has json method
+            if (error.response && typeof error.response.json === 'function') {
+              const errorData = await error.response.json();
+              errorType = errorData.errorType;
+              errorMessage = errorData.message || errorData.devMessage || "";
+            } else {
+              errorMessage = error.message || "";
+            }
+          } catch (parseError) {
+            errorMessage = error.message || "";
+          }
+          
+          // Check if it's a configuration error
+          if (
+            errorType === 'config_missing' || 
+            errorType === 'stripe_config_error' ||
+            errorMessage.includes("config") || 
+            errorMessage.includes("STRIPE_PRICE_ID")
+          ) {
             // Config error - show friendly UI
+            console.warn("Stripe configuration error detected:", errorMessage);
             setIsConfigMissing(true);
           } else {
             // Other errors - show user-friendly message
