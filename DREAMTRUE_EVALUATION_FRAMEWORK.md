@@ -326,7 +326,23 @@ Each section uses a 4-level scoring system:
   - [ ] Consistent response times
   - **Score**: ___/4
 
-**RAG Integration Total**: ___/12 points
+### Production RAG Performance (Post-Deployment)
+
+- [ ] **Vector Search Speed**: Measured in production
+  - [ ] Average search time < 100ms
+  - [ ] No timeout errors
+  - [ ] Handles concurrent requests
+  - [ ] ChromaDB server stable under load
+  - **Score**: ___/4
+
+- [ ] **Citation Quality**: Real-world validation
+  - [ ] Citations relevant to dream content (spot-check 10 dreams)
+  - [ ] Relevance scores consistently > 0.7
+  - [ ] No duplicate citations in results
+  - [ ] APA formatting correct in UI
+  - **Score**: ___/4
+
+**RAG Integration Total**: ___/20 points
 
 ---
 
@@ -359,7 +375,7 @@ Each section uses a 4-level scoring system:
 
 ---
 
-**RAG System Grand Total**: ___/72 points
+**RAG System Grand Total**: ___/80 points
 
 ---
 
@@ -382,6 +398,17 @@ Each section uses a 4-level scoring system:
   - [ ] Stop/cancel functionality
   - [ ] Error handling (no mic, denied permission)
   - [ ] Works on mobile devices
+  - **Score**: ___/4
+
+- [ ] **Voice Input - Device Testing**: Real-world validation
+  - [ ] Tested on iOS Safari (iPhone)
+  - [ ] Tested on Android Chrome
+  - [ ] Microphone permission flow works
+  - [ ] Transcription accuracy acceptable (>80%)
+  - [ ] Real-time transcript updates
+  - [ ] Stop button functional
+  - [ ] Transcript transfers to dream textarea
+  - [ ] Error handling for denied permissions
   - **Score**: ___/4
 
 - [ ] **Context Selection**: Emotional/life context
@@ -414,7 +441,25 @@ Each section uses a 4-level scoring system:
   - [ ] Context-aware interpretation
   - **Score**: ___/4
 
-**Core Features Subtotal**: ___/24 points
+### Special Features
+
+- [ ] **Breathing Exercise**: Nightmare support feature
+  - [ ] 4-7-8 breathing technique animation working
+  - [ ] Haptic feedback functional (mobile)
+  - [ ] Audio cues playing (breathing bell, completion sound)
+  - [ ] 3 cycles complete successfully
+  - [ ] Skip option works
+  - [ ] Helps users calm down before/after nightmare input
+  - **Score**: ___/4
+
+- [ ] **Component Examples**: Demo components functional
+  - [ ] All examples in /components/examples render
+  - [ ] SystemToggle switches between RAG/Agentic
+  - [ ] Examples demonstrate proper component usage
+  - [ ] No console errors in examples
+  - **Score**: ___/4
+
+**Core Features Subtotal**: ___/32 points
 
 ---
 
@@ -497,7 +542,18 @@ Each section uses a 4-level scoring system:
   - [ ] Error handling
   - **Score**: ___/4
 
-**Premium Features Subtotal**: ___/16 points
+- [ ] **End-to-End Payment Flow**: Full Stripe integration
+  - [ ] User clicks "Upgrade to Premium"
+  - [ ] Stripe checkout session created
+  - [ ] Payment submitted successfully
+  - [ ] Webhook received and processed
+  - [ ] isPremium flag updated in database
+  - [ ] Deep Dive immediately unlocked
+  - [ ] Unlimited dream saves enabled
+  - [ ] Stripe customer ID stored
+  - **Score**: ___/4
+
+**Premium Features Subtotal**: ___/20 points
 
 ---
 
@@ -530,7 +586,7 @@ Each section uses a 4-level scoring system:
 
 ---
 
-**Feature Completeness Grand Total**: ___/72 points
+**Feature Completeness Grand Total**: ___/76 points
 
 ---
 
@@ -797,7 +853,17 @@ Each section uses a 4-level scoring system:
   - [ ] Reasonable per-request cost
   - **Score**: ___/4
 
-**Performance Metrics Subtotal**: ___/16 points
+### AI Metrics Monitoring
+
+- [ ] **AI Metrics Tracking**: Performance monitoring
+  - [ ] Latency tracked per interpretation
+  - [ ] Token usage recorded (prompt + completion)
+  - [ ] Error rates monitored
+  - [ ] Cost estimation available
+  - [ ] GET /api/monitoring/metrics returns aggregated data
+  - **Score**: ___/4
+
+**Performance Metrics Subtotal**: ___/20 points
 
 ---
 
@@ -1368,6 +1434,22 @@ Each section uses a 4-level scoring system:
   - [ ] User impact minimized
   - **Score**: ___/4 (or N/A)
 
+### Error Database Storage
+
+- [ ] **Error Logging**: Errors persisted to DB
+  - [ ] `logError()` saves to errors table
+  - [ ] Stack traces stored
+  - [ ] Error context tracked (endpoint, userId)
+  - [ ] Timestamps accurate
+  - **Score**: ___/4
+
+- [ ] **Error Retrieval**: API endpoints functional
+  - [ ] GET /api/monitoring/errors returns recent errors
+  - [ ] GET /api/monitoring/errors?limit=50 respects limit
+  - [ ] Errors sorted by createdAt (newest first)
+  - [ ] Authentication required for access
+  - **Score**: ___/4
+
 ### Performance Monitoring
 - [ ] **Metrics Collection**: Usage data
   - [ ] API response times
@@ -1376,11 +1458,11 @@ Each section uses a 4-level scoring system:
   - [ ] User growth tracked
   - **Score**: ___/4 (or N/A)
 
-**Monitoring & Logging Subtotal**: ___/12 points (adjust if N/A)
+**Monitoring & Logging Subtotal**: ___/20 points (adjust if N/A)
 
 ---
 
-**Deployment Readiness Grand Total**: ___/52 points
+**Deployment Readiness Grand Total**: ___/60 points
 
 ---
 
@@ -1560,43 +1642,43 @@ Each section uses a 4-level scoring system:
 | Section | Points Earned | Points Possible | Percentage |
 |---------|---------------|-----------------|------------|
 | 1. Technical Architecture | ___/60 | 60 | __% |
-| 2. RAG System Quality | ___/72 | 72 | __% |
-| 3. Feature Completeness | ___/72 | 72 | __% |
+| 2. RAG System Quality | ___/80 | 80 | __% |
+| 3. Feature Completeness | ___/88 | 88 | __% |
 | 4. User Experience | ___/80 | 80 | __% |
-| 5. AI/ML System Performance | ___/48 | 48 | __% |
+| 5. AI/ML System Performance | ___/56 | 56 | __% |
 | 6. Business Logic | ___/48 | 48 | __% |
 | 7. Security & Data Protection | ___/40 | 40 | __% |
 | 8. Performance & Scalability | ___/44 | 44 | __% |
 | 9. Testing Coverage | ___/44 | 44 | __% |
-| 10. Deployment Readiness | ___/52 | 52 | __% |
+| 10. Deployment Readiness | ___/60 | 60 | __% |
 | 11. Documentation Quality | ___/32 | 32 | __% |
 | 12. Brand Promise Verification | ___/32 | 32 | __% |
 
-**TOTAL SCORE**: ___/624 points = ___%
+**TOTAL SCORE**: ___/664 points = ___%
 
 ---
 
 ## Overall Rating
 
-### 90-100% (560-624 points): ✅ PRODUCTION-READY
+### 90-100% (598-664 points): ✅ PRODUCTION-READY
 - App exceeds expectations across all dimensions
 - Ready for public launch
 - Competitive product with strong differentiation
 - Minor improvements optional
 
-### 75-89% (468-559 points): ✔️ NEAR-READY
+### 75-89% (498-597 points): ✔️ NEAR-READY
 - Core functionality solid
 - Some areas need polish
 - Address medium-priority items before launch
 - Launch-worthy with caveats
 
-### 60-74% (374-467 points): ⚠️ NEEDS WORK
+### 60-74% (399-497 points): ⚠️ NEEDS WORK
 - Functional but rough edges
 - Several critical gaps to address
 - Not recommended for public launch yet
 - Internal testing appropriate
 
-### Below 60% (<374 points): ❌ NOT READY
+### Below 60% (<399 points): ❌ NOT READY
 - Significant gaps in core areas
 - Critical functionality missing or broken
 - Requires substantial work before launch
