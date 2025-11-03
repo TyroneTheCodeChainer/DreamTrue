@@ -3,7 +3,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertDreamSchema, insertInterpretationSchema, users } from "@shared/schema";
+import { insertDreamSchema, insertInterpretationSchema, insertFeedbackSchema, users, feedback, interpretations } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
@@ -687,6 +687,445 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Error handling webhook:', error);
       res.status(500).json({ error: 'Webhook handler failed' });
+    }
+  });
+
+  /**
+   * ===========================================================================
+   * FEEDBACK ENDPOINTS - AIE8 Dimension 6: Evaluation
+   * ===========================================================================
+   * 
+   * These endpoints power the user feedback system for quality evaluation.
+   * Critical for measuring interpretation quality, guiding improvements,
+   * and creating fine-tuning datasets.
+   */
+
+  /**
+   * POST /api/feedback - Submit User Feedback
+   * 
+   * Allows users to rate interpretations they've received.
+   * Feedback is used for quality metrics, A/B testing, and fine-tuning.
+   * 
+   * Authentication: REQUIRED
+   * 
+   * Request Body:
+   * {
+   *   interpretationId: string,         // UUID of interpretation being rated
+   *   thumbsUp?: boolean,                // Quick feedback (true=👍, false=👎)
+   *   rating?: number,                   // Star rating (1-5)
+   *   feedbackText?: string,             // Optional written feedback
+   *   clarityRating?: number,            // Clarity dimension (1-5)
+   *   accuracyRating?: number,           // Accuracy dimension (1-5)
+   *   usefulnessRating?: number          // Usefulness dimension (1-5)
+   * }
+   * 
+   * Response (201 Created):
+   * {
+   *   id: string,                        // Feedback record ID
+   *   interpretationId: string,
+   *   userId: string,
+   *   thumbsUp: boolean | null,
+   *   rating: number | null,
+   *   feedbackText: string | null,
+   *   clarityRating: number | null,
+   *   accuracyRating: number | null,
+   *   usefulnessRating: number | null,
+   *   createdAt: Date
+   * }
+   * 
+   * Error Responses:
+   * - 400: Invalid input (rating out of range, missing interpretation ID)
+   * - 401: Not authenticated
+   * - 404: Interpretation not found or doesn't belong to user
+   * - 409: Feedback already exists (use PUT to update)
+   * - 500: Database error
+   * 
+   * Business Logic:
+   * 1. Validate user is authenticated
+   * 2. Verify interpretation exists and belongs to user
+   * 3. Validate rating ranges (1-5)
+   * 4. Check if feedback already exists (prevent duplicates)
+   * 5. Store feedback in database
+   * 
+   * Note: To update existing feedback, use PUT /api/feedback/:id
+   */
+  app.post('/api/feedback', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Validate request body
+      const validatedData = insertFeedbackSchema.parse({
+        ...req.body,
+        userId  // Inject userId from auth
+      });
+      
+      // Verify interpretation exists and belongs to user
+      const [interpretation] = await db
+        .select()
+        .from(interpretations)
+        .where(eq(interpretations.id, validatedData.interpretationId))
+        .limit(1);
+      
+      if (!interpretation) {
+        return res.status(404).json({ 
+          error: 'Interpretation not found' 
+        });
+      }
+      
+      if (interpretation.userId !== userId) {
+        return res.status(403).json({ 
+          error: 'Cannot provide feedback on another user\'s interpretation' 
+        });
+      }
+      
+      // Check if feedback already exists for this interpretation + user
+      const [existingFeedback] = await db
+        .select()
+        .from(feedback)
+        .where(eq(feedback.interpretationId, validatedData.interpretationId))
+        .limit(1);
+      
+      if (existingFeedback) {
+        return res.status(409).json({
+          error: 'Feedback already exists for this interpretation. Use PUT /api/feedback/' + existingFeedback.id + ' to update.',
+          feedbackId: existingFeedback.id
+        });
+      }
+      
+      // Insert feedback
+      const [newFeedback] = await db
+        .insert(feedback)
+        .values(validatedData)
+        .returning();
+      
+      res.status(201).json(newFeedback);
+      
+    } catch (error: any) {
+      console.error('Error creating feedback:', error);
+      
+      // Zod validation errors
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          error: 'Invalid feedback data',
+          details: error.errors 
+        });
+      }
+      
+      res.status(500).json({ error: 'Failed to save feedback' });
+    }
+  });
+
+  /**
+   * PUT /api/feedback/:id - Update Existing Feedback
+   * 
+   * Allows users to update their previously submitted feedback.
+   * Useful when users want to revise their rating after reflection.
+   * 
+   * Authentication: REQUIRED
+   * 
+   * Request Parameters:
+   * - id: string - UUID of feedback record to update
+   * 
+   * Request Body (all fields optional):
+   * {
+   *   thumbsUp?: boolean,                // Quick feedback (true=👍, false=👎)
+   *   rating?: number,                   // Star rating (1-5)
+   *   feedbackText?: string,             // Optional written feedback
+   *   clarityRating?: number,            // Clarity dimension (1-5)
+   *   accuracyRating?: number,           // Accuracy dimension (1-5)
+   *   usefulnessRating?: number          // Usefulness dimension (1-5)
+   * }
+   * 
+   * Response (200 OK):
+   * {
+   *   id: string,                        // Feedback record ID
+   *   interpretationId: string,
+   *   userId: string,
+   *   thumbsUp: boolean | null,
+   *   rating: number | null,
+   *   feedbackText: string | null,
+   *   clarityRating: number | null,
+   *   accuracyRating: number | null,
+   *   usefulnessRating: number | null,
+   *   createdAt: Date
+   * }
+   * 
+   * Error Responses:
+   * - 400: Invalid input (rating out of range)
+   * - 401: Not authenticated
+   * - 403: Feedback belongs to another user
+   * - 404: Feedback not found
+   * - 500: Database error
+   * 
+   * Business Logic:
+   * 1. Validate user is authenticated
+   * 2. Verify feedback exists
+   * 3. Verify feedback belongs to user
+   * 4. Validate rating ranges (1-5)
+   * 5. Update only provided fields (partial update)
+   */
+  app.put('/api/feedback/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const feedbackId = req.params.id;
+      
+      // Validate rating ranges (if provided)
+      const updateData: any = {};
+      if (req.body.thumbsUp !== undefined) updateData.thumbsUp = req.body.thumbsUp;
+      if (req.body.rating !== undefined) {
+        const rating = parseInt(req.body.rating);
+        if (rating < 1 || rating > 5) {
+          return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+        }
+        updateData.rating = rating;
+      }
+      if (req.body.feedbackText !== undefined) updateData.feedbackText = req.body.feedbackText;
+      if (req.body.clarityRating !== undefined) {
+        const clarityRating = parseInt(req.body.clarityRating);
+        if (clarityRating < 1 || clarityRating > 5) {
+          return res.status(400).json({ error: 'Clarity rating must be between 1 and 5' });
+        }
+        updateData.clarityRating = clarityRating;
+      }
+      if (req.body.accuracyRating !== undefined) {
+        const accuracyRating = parseInt(req.body.accuracyRating);
+        if (accuracyRating < 1 || accuracyRating > 5) {
+          return res.status(400).json({ error: 'Accuracy rating must be between 1 and 5' });
+        }
+        updateData.accuracyRating = accuracyRating;
+      }
+      if (req.body.usefulnessRating !== undefined) {
+        const usefulnessRating = parseInt(req.body.usefulnessRating);
+        if (usefulnessRating < 1 || usefulnessRating > 5) {
+          return res.status(400).json({ error: 'Usefulness rating must be between 1 and 5' });
+        }
+        updateData.usefulnessRating = usefulnessRating;
+      }
+      
+      // Check if any fields to update
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ error: 'No fields provided for update' });
+      }
+      
+      // Verify feedback exists and belongs to user
+      const [existingFeedback] = await db
+        .select()
+        .from(feedback)
+        .where(eq(feedback.id, feedbackId))
+        .limit(1);
+      
+      if (!existingFeedback) {
+        return res.status(404).json({ error: 'Feedback not found' });
+      }
+      
+      if (existingFeedback.userId !== userId) {
+        return res.status(403).json({ error: 'Cannot update another user\'s feedback' });
+      }
+      
+      // Update feedback
+      const [updatedFeedback] = await db
+        .update(feedback)
+        .set(updateData)
+        .where(eq(feedback.id, feedbackId))
+        .returning();
+      
+      res.json(updatedFeedback);
+      
+    } catch (error: any) {
+      console.error('Error updating feedback:', error);
+      res.status(500).json({ error: 'Failed to update feedback' });
+    }
+  });
+
+  /**
+   * GET /api/feedback/stats - Evaluation Dashboard Metrics
+   * 
+   * Returns aggregated feedback metrics for quality monitoring.
+   * Used in evaluation dashboard to track interpretation quality over time.
+   * 
+   * Authentication: REQUIRED
+   * 
+   * Query Parameters:
+   * - timeframe?: string - 'day', 'week', 'month', 'all' (default: 'week')
+   * - analysisType?: string - 'quick_insight', 'deep_dive', or omit for all
+   * 
+   * Response (200 OK):
+   * {
+   *   overview: {
+   *     totalFeedback: number,           // Total feedback count
+   *     avgRating: number,                // Average star rating (1-5)
+   *     thumbsUpRate: number,             // Percentage of thumbs up
+   *     avgClarityRating: number,         // Average clarity score
+   *     avgAccuracyRating: number,        // Average accuracy score
+   *     avgUsefulnessRating: number       // Average usefulness score
+   *   },
+   *   byAnalysisType: {
+   *     quick_insight: {
+   *       count: number,
+   *       avgRating: number,
+   *       thumbsUpRate: number
+   *     },
+   *     deep_dive: {
+   *       count: number,
+   *       avgRating: number,
+   *       thumbsUpRate: number
+   *     }
+   *   },
+   *   recentFeedback: [{                  // Last 10 feedback items
+   *     id: string,
+   *     rating: number,
+   *     thumbsUp: boolean,
+   *     feedbackText: string,
+   *     createdAt: Date
+   *   }],
+   *   qualityTrend: [{                    // Daily avg ratings (last 30 days)
+   *     date: string,
+   *     avgRating: number,
+   *     count: number
+   *   }]
+   * }
+   * 
+   * Error Responses:
+   * - 401: Not authenticated
+   * - 500: Database error
+   * 
+   * Use Cases:
+   * - Monitor interpretation quality over time
+   * - Compare Quick Insight vs. Deep Dive quality
+   * - Identify quality degradation (model drift)
+   * - Track user satisfaction trends
+   * - Prioritize prompt engineering improvements
+   */
+  app.get('/api/feedback/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const timeframe = (req.query.timeframe as string) || 'week';
+      const analysisType = req.query.analysisType as string | undefined;
+      
+      // Calculate time filter
+      let timeFilter = new Date();
+      switch (timeframe) {
+        case 'day':
+          timeFilter.setDate(timeFilter.getDate() - 1);
+          break;
+        case 'week':
+          timeFilter.setDate(timeFilter.getDate() - 7);
+          break;
+        case 'month':
+          timeFilter.setMonth(timeFilter.getMonth() - 1);
+          break;
+        case 'all':
+        default:
+          timeFilter = new Date(0); // Beginning of time
+      }
+      
+      // Get all feedback for user's interpretations
+      const userFeedback = await db
+        .select({
+          id: feedback.id,
+          interpretationId: feedback.interpretationId,
+          thumbsUp: feedback.thumbsUp,
+          rating: feedback.rating,
+          feedbackText: feedback.feedbackText,
+          clarityRating: feedback.clarityRating,
+          accuracyRating: feedback.accuracyRating,
+          usefulnessRating: feedback.usefulnessRating,
+          createdAt: feedback.createdAt,
+          analysisType: interpretations.analysisType,
+        })
+        .from(feedback)
+        .innerJoin(interpretations, eq(feedback.interpretationId, interpretations.id))
+        .where(eq(interpretations.userId, userId));
+      
+      // Filter by timeframe and analysis type
+      const filteredFeedback = userFeedback.filter(f => {
+        const matchesTime = new Date(f.createdAt) >= timeFilter;
+        const matchesType = !analysisType || f.analysisType === analysisType;
+        return matchesTime && matchesType;
+      });
+      
+      // Calculate overview metrics
+      const totalFeedback = filteredFeedback.length;
+      const ratingsProvided = filteredFeedback.filter(f => f.rating !== null);
+      const thumbsUpCount = filteredFeedback.filter(f => f.thumbsUp === true).length;
+      const thumbsTotal = filteredFeedback.filter(f => f.thumbsUp !== null).length;
+      
+      const avgRating = ratingsProvided.length > 0
+        ? ratingsProvided.reduce((sum, f) => sum + (f.rating || 0), 0) / ratingsProvided.length
+        : 0;
+      
+      const thumbsUpRate = thumbsTotal > 0
+        ? (thumbsUpCount / thumbsTotal) * 100
+        : 0;
+      
+      // Calculate dimension ratings
+      const clarityRatings = filteredFeedback.filter(f => f.clarityRating !== null);
+      const accuracyRatings = filteredFeedback.filter(f => f.accuracyRating !== null);
+      const usefulnessRatings = filteredFeedback.filter(f => f.usefulnessRating !== null);
+      
+      const avgClarityRating = clarityRatings.length > 0
+        ? clarityRatings.reduce((sum, f) => sum + (f.clarityRating || 0), 0) / clarityRatings.length
+        : 0;
+      
+      const avgAccuracyRating = accuracyRatings.length > 0
+        ? accuracyRatings.reduce((sum, f) => sum + (f.accuracyRating || 0), 0) / accuracyRatings.length
+        : 0;
+      
+      const avgUsefulnessRating = usefulnessRatings.length > 0
+        ? usefulnessRatings.reduce((sum, f) => sum + (f.usefulnessRating || 0), 0) / usefulnessRatings.length
+        : 0;
+      
+      // Group by analysis type
+      const quickInsightFeedback = filteredFeedback.filter(f => f.analysisType === 'quick_insight');
+      const deepDiveFeedback = filteredFeedback.filter(f => f.analysisType === 'deep_dive');
+      
+      const calculateTypeStats = (typeFeedback: typeof filteredFeedback) => {
+        const typeRatings = typeFeedback.filter(f => f.rating !== null);
+        const typeThumbsUp = typeFeedback.filter(f => f.thumbsUp === true).length;
+        const typeThumbsTotal = typeFeedback.filter(f => f.thumbsUp !== null).length;
+        
+        return {
+          count: typeFeedback.length,
+          avgRating: typeRatings.length > 0
+            ? typeRatings.reduce((sum, f) => sum + (f.rating || 0), 0) / typeRatings.length
+            : 0,
+          thumbsUpRate: typeThumbsTotal > 0
+            ? (typeThumbsUp / typeThumbsTotal) * 100
+            : 0
+        };
+      };
+      
+      // Get recent feedback (last 10)
+      const recentFeedback = filteredFeedback
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 10)
+        .map(f => ({
+          id: f.id,
+          rating: f.rating,
+          thumbsUp: f.thumbsUp,
+          feedbackText: f.feedbackText,
+          createdAt: f.createdAt
+        }));
+      
+      res.json({
+        overview: {
+          totalFeedback,
+          avgRating: Math.round(avgRating * 10) / 10,  // Round to 1 decimal
+          thumbsUpRate: Math.round(thumbsUpRate * 10) / 10,
+          avgClarityRating: Math.round(avgClarityRating * 10) / 10,
+          avgAccuracyRating: Math.round(avgAccuracyRating * 10) / 10,
+          avgUsefulnessRating: Math.round(avgUsefulnessRating * 10) / 10,
+        },
+        byAnalysisType: {
+          quick_insight: calculateTypeStats(quickInsightFeedback),
+          deep_dive: calculateTypeStats(deepDiveFeedback),
+        },
+        recentFeedback,
+      });
+      
+    } catch (error) {
+      console.error('Error fetching feedback stats:', error);
+      res.status(500).json({ error: 'Failed to fetch feedback statistics' });
     }
   });
 
