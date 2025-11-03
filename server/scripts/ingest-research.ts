@@ -55,43 +55,51 @@ interface PaperConfig {
  * - book: Academic books (cite chapter/section)
  */
 const RESEARCH_PAPERS: PaperConfig[] = [
-  // Example 1: Neuroscience paper on REM sleep
-  // {
-  //   path: 'attached_assets/research_papers/nielsen_2010_rem_sleep_dreaming.pdf',
-  //   metadata: {
-  //     source: 'REM Sleep and Dreaming: Towards a Theory of Protoconsciousness',
-  //     author: 'Nielsen, T.',
-  //     year: 2010,
-  //     category: 'neuroscience',
-  //     validation: 'peer_reviewed',
-  //     doi: '10.1038/nrn2716',
-  //   },
-  // },
+  {
+    path: 'attached_assets/474-Article Text-2073-2-10-20100422_1762152137846.pdf',
+    metadata: {
+      source: 'Schredl, M. (2010). Dream content analysis: Basic principles. International Journal of Dream Research, 3(1), 65-73.',
+      author: 'Schredl, M.',
+      year: 2010,
+      category: 'content_analysis',
+      validation: 'peer_reviewed',
+    },
+  },
   
-  // Example 2: Psychology paper on dream content
-  // {
-  //   path: 'attached_assets/research_papers/domhoff_2017_dream_content.pdf',
-  //   metadata: {
-  //     source: 'The Invasion of the Concept Snatchers: The Origins, Distortions, and Future of the Continuity Hypothesis',
-  //     author: 'Domhoff, G. W.',
-  //     year: 2017,
-  //     category: 'psychology',
-  //     validation: 'peer_reviewed',
-  //     doi: '10.1037/drm0000047',
-  //   },
-  // },
+  {
+    path: 'attached_assets/book-review-the-content-analysis-of-dreams-hall-van-de-castle_1762152137848.pdf',
+    metadata: {
+      source: 'Stephenson, W. (1967). Review of The Content Analysis of Dreams by Hall & Van de Castle. The American Journal of Psychology, 80(1), 156-159.',
+      author: 'Stephenson, W.; Hall, C. S.; Van de Castle, R. L.',
+      year: 1967,
+      category: 'content_analysis',
+      validation: 'peer_reviewed',
+    },
+  },
   
-  // Example 3: Content analysis book chapter
-  // {
-  //   path: 'attached_assets/research_papers/jung_1964_man_symbols_dreams.pdf',
-  //   metadata: {
-  //     source: 'Man and His Symbols',
-  //     author: 'Jung, C. G.',
-  //     year: 1964,
-  //     category: 'content_analysis',
-  //     validation: 'book',
-  //   },
-  // },
+  {
+    path: 'attached_assets/fpsyg-11-585702 (1)_1762152137850.pdf',
+    metadata: {
+      source: 'Holzinger, B., Mayer, L., Barros, I., Nierwetberg, F., & Klösch, G. (2020). The Dreamland: Validation of a Structured Dream Diary. Frontiers in Psychology, 11, 585702.',
+      author: 'Holzinger, B., Mayer, L., Barros, I., Nierwetberg, F., & Klösch, G.',
+      year: 2020,
+      category: 'content_analysis',
+      validation: 'peer_reviewed',
+      doi: '10.3389/fpsyg.2020.585702',
+    },
+  },
+  
+  {
+    path: 'attached_assets/fpsyg-12-718372 (1)_1762152137852.pdf',
+    metadata: {
+      source: 'Flores Mosri, D. (2021). Clinical Applications of Neuropsychoanalysis: Hypotheses Toward an Integrative Model. Frontiers in Psychology, 12, 718372.',
+      author: 'Flores Mosri, D.',
+      year: 2021,
+      category: 'psychology',
+      validation: 'peer_reviewed',
+      doi: '10.3389/fpsyg.2021.718372',
+    },
+  },
 ];
 
 /**

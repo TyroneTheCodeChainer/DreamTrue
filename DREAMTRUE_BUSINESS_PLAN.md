@@ -26,6 +26,7 @@ Freemium SaaS subscription:
 - **Annual:** $79.95/year ($6.66/month, 33% savings)
 - **Target Conversion Rate:** 3-5% (industry standard for freemium)
 
+
 ### Market Opportunity
 - **Total Addressable Market:** 95% of people recall their dreams regularly
 - **Primary Demographic:** Ages 18-35, 79% employed, wellness-conscious

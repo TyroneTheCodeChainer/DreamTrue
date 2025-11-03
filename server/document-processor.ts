@@ -24,8 +24,10 @@
 
 import { readFileSync } from 'fs';
 import { DocumentChunk } from './vector-store';
+import { createRequire } from 'module';
 
-// pdf-parse is a CommonJS module, use require
+// pdf-parse is a CommonJS module, need createRequire for ES modules
+const require = createRequire(import.meta.url);
 const pdfParse = require('pdf-parse');
 
 /**

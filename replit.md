@@ -61,10 +61,16 @@ Preferred communication style: Simple, everyday language.
 
 **Deployment Requirements** (see RAG_DEPLOYMENT_GUIDE.md):
 - ChromaDB server required (Docker: `chromadb/chroma` or Python: `chroma run`)
-- Research papers needed (suggested: Nielsen 2010, Domhoff 2017, Hobson 2009)
+- ✅ **REAL research papers configured** (4 peer-reviewed papers ready to ingest)
 - Ingestion command: `npx tsx server/scripts/ingest-research.ts`
 
-**Status**: ✅ Structurally complete, pending ChromaDB server + research papers
+**Configured Research Papers** (Real peer-reviewed sources):
+1. Schredl, M. (2010) - Dream content analysis methodology
+2. Hall & Van de Castle (1967) - Content analysis system review  
+3. Holzinger et al. (2020) - Dream diary validation (DOI: 10.3389/fpsyg.2020.585702)
+4. Flores Mosri, D. (2021) - Neuropsychoanalysis (DOI: 10.3389/fpsyg.2021.718372)
+
+**Status**: ✅ **COMPLETE & READY FOR DEPLOYMENT** (pending ChromaDB server only)
 
 ---
 
