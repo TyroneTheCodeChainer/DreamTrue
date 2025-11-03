@@ -248,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             stressLevel: context.stressLevel || null,
           });
           
-          // Save interpretation linked to dream (with monitoring metrics)
+          // Save interpretation linked to dream (with monitoring metrics + RAG citations)
           const savedInterpretation = await storage.createInterpretation({
             userId,
             dreamId: dream.id,
@@ -258,6 +258,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             emotions: interpretation.emotions || [],
             themes: interpretation.themes || [],
             confidence: interpretation.confidence || 0,
+            // RAG System: Store research paper citations for transparency
+            citations: interpretation.citations || [],
             // AIE8 Dimension 7: Store monitoring metrics for performance tracking
             tokensUsed: interpretation.metrics.tokensUsed,
             latencyMs: interpretation.metrics.latencyMs,

@@ -21,6 +21,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { vectorStore, SearchResult } from './vector-store';
 
 /**
  * API Key Configuration
@@ -100,6 +101,22 @@ interface InterpretationMetrics {
 }
 
 /**
+ * Citation Interface
+ * 
+ * Represents a real research paper citation used in dream interpretation.
+ * Critical for brand promise: "Real insights. Rooted in research."
+ * 
+ * @property text - Full APA citation (e.g., "Smith, J. (2020). Dream Analysis...")
+ * @property relevance - How relevant this source was to the interpretation (0-1)
+ * @property excerpt - Brief quote or summary from the paper used in analysis
+ */
+interface Citation {
+  text: string;
+  relevance: number;
+  excerpt: string;
+}
+
+/**
  * Structured Interpretation Result
  * 
  * Standard response format ensuring consistent data structure across all dream analyses.
@@ -115,6 +132,7 @@ interface InterpretationMetrics {
  * @property themes - Overarching psychological themes (e.g., ["transformation", "control issues"])
  * @property confidence - AI's confidence score 0-100 (based on dream clarity/detail)
  * @property analysisType - Which analysis mode was used (for billing/features)
+ * @property citations - Real research papers used in analysis (RAG-powered)
  * @property metrics - Performance and cost tracking data (AIE8 Dimension 7)
  */
 interface InterpretationResult {
@@ -124,6 +142,7 @@ interface InterpretationResult {
   themes: string[];
   confidence: number;
   analysisType: 'quick_insight' | 'deep_dive';
+  citations: Citation[];
   metrics: InterpretationMetrics;
 }
 
@@ -166,6 +185,77 @@ export async function interpretDream(
 ): Promise<InterpretationResult> {
   
   /**
+   * RAG Step 1: Retrieve Relevant Research (Retrieval-Augmented Generation)
+   * 
+   * Before calling Claude, search the vector database for relevant research papers.
+   * This grounds the AI's interpretation in real peer-reviewed science instead of
+   * relying solely on Claude's pre-training data (which may include pseudoscience).
+   * 
+   * Process:
+   * 1. Search vector DB for semantically similar research (top 3-5 chunks)
+   * 2. Extract relevant excerpts and citations
+   * 3. Include in system prompt as "research context"
+   * 4. Claude uses this context to inform interpretation
+   * 5. Return citations to frontend for transparency
+   * 
+   * Benefits:
+   * - Prevents AI hallucination (citations are real, not invented)
+   * - Supports brand promise: "Real insights. Rooted in research."
+   * - Enables user verification (can look up papers via DOI)
+   * - Builds trust (shows scientific backing)
+   * 
+   * Performance:
+   * - Vector search adds ~100-300ms latency
+   * - ChromaDB query is fast (embeddings pre-computed)
+   * - Worth it for citation credibility
+   */
+  let researchContext = '';
+  let citations: Citation[] = [];
+  
+  try {
+    // Initialize vector store if needed
+    await vectorStore.initializeCollection();
+    
+    // Check if vector store has documents
+    const documentCount = await vectorStore.getDocumentCount();
+    
+    if (documentCount > 0) {
+      // Search for relevant research (more results for Deep Dive)
+      const numResults = analysisType === 'deep_dive' ? 5 : 3;
+      const searchResults: SearchResult[] = await vectorStore.search(dreamText, numResults);
+      
+      if (searchResults.length > 0) {
+        // Build research context for prompt
+        researchContext = '\n\nRELEVANT RESEARCH CONTEXT:\n';
+        researchContext += 'Use the following peer-reviewed research to inform your interpretation:\n\n';
+        
+        searchResults.forEach((result, index) => {
+          researchContext += `[${index + 1}] ${result.citation}\n`;
+          researchContext += `   Excerpt: ${result.content.slice(0, 300)}...\n\n`;
+        });
+        
+        // Build citations array for response
+        citations = searchResults.map(result => ({
+          text: result.citation,
+          relevance: result.relevanceScore,
+          excerpt: result.content.slice(0, 200) + '...'
+        }));
+        
+        console.log(`✓ RAG: Retrieved ${searchResults.length} research citations for interpretation`);
+      } else {
+        console.warn('⚠️ RAG: Vector search returned no results');
+      }
+    } else {
+      console.warn('⚠️ RAG: Vector database is empty (no research papers ingested)');
+      console.warn('   Run: npx tsx server/scripts/ingest-research.ts');
+    }
+  } catch (error: any) {
+    // Don't fail interpretation if RAG fails - degrade gracefully
+    console.error('⚠️ RAG retrieval failed:', error.message);
+    console.error('   Continuing with interpretation without research citations');
+  }
+  
+  /**
    * System Prompt Selection
    * 
    * Different prompts optimize Claude's behavior for each analysis mode:
@@ -196,7 +286,7 @@ export async function interpretDream(
 - Practical insights (1-2 paragraphs)
 - Brief actionable guidance
 
-Be supportive, insightful, and research-backed.`
+Be supportive, insightful, and research-backed.${researchContext ? '\n\nIMPORTANT: Ground your interpretation in the research context provided. Reference the research when relevant to support your analysis.' : ''}`
     : `You are an AI dream interpreter providing Deep Dive analysis. Provide comprehensive analysis including:
 - Detailed symbol analysis with psychological and cultural context
 - Emotional patterns and their significance
@@ -204,7 +294,7 @@ Be supportive, insightful, and research-backed.`
 - Multiple theoretical perspectives (Jungian, Freudian, modern neuroscience)
 - Actionable insights and reflection questions
 
-Be thorough, evidence-based, and transformative.`;
+Be thorough, evidence-based, and transformative.${researchContext ? '\n\nIMPORTANT: Ground your interpretation in the research context provided. Cite specific studies and findings to support your analysis.' : ''}`;
 
   /**
    * Context Integration
@@ -243,7 +333,7 @@ Be thorough, evidence-based, and transformative.`;
    */
   const userPrompt = `Please interpret this dream${userContext}:
 
-"${dreamText}"
+"${dreamText}"${researchContext}
 
 Provide your analysis in JSON format with these fields:
 {
@@ -554,6 +644,7 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
       themes: Array.isArray(parsed.themes) ? parsed.themes : [],
       confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 75,
       analysisType,
+      citations, // Include RAG-retrieved research citations
       metrics: {
         tokensUsed,
         latencyMs,

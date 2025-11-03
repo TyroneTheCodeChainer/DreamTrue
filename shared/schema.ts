@@ -932,6 +932,56 @@ export const interpretations = pgTable("interpretations", {
   errorMessage: text("error_message"),
   
   /**
+   * citations: Research Paper Citations (RAG System)
+   * 
+   * JSONB array of citation objects from vector database
+   * 
+   * Enables DreamTrue's core brand promise: "Real insights. Rooted in research."
+   * Instead of AI hallucinating citations, we ground interpretations in real
+   * peer-reviewed research using RAG (Retrieval-Augmented Generation).
+   * 
+   * Structure (array of objects):
+   * [
+   *   {
+   *     "text": "Nielsen, T. (2010). REM Sleep and Dreaming. doi:10.1038/nrn2716",
+   *     "relevance": 0.87,
+   *     "excerpt": "REM sleep is characterized by rapid eye movements..."
+   *   },
+   *   ...
+   * ]
+   * 
+   * Each citation contains:
+   * - text: Full APA citation with DOI (user can verify)
+   * - relevance: Semantic similarity score 0-1 (how relevant to dream)
+   * - excerpt: Brief quote from paper used in interpretation
+   * 
+   * Why JSONB instead of separate table?
+   * - Flexible structure (research papers have varying metadata)
+   * - Simpler queries (no joins needed)
+   * - PostgreSQL JSONB is performant (indexed, searchable)
+   * - Citations are tightly coupled to interpretation (no standalone use)
+   * 
+   * How populated?
+   * - vector-store.ts searches ChromaDB for relevant research
+   * - Top 3-5 most relevant papers retrieved
+   * - Citations extracted from metadata
+   * - Included in interpretation result
+   * 
+   * Used for:
+   * - Building user trust (show scientific backing)
+   * - Preventing AI hallucination (real citations only)
+   * - User verification (can look up papers via DOI)
+   * - Compliance with research ethics (proper attribution)
+   * 
+   * Business value:
+   * - Differentiates from competitors (pseudoscience dream apps)
+   * - Supports premium pricing (research-backed = higher quality)
+   * - Enables academic partnerships (credible methodology)
+   * - Reduces liability (attributions protect against misinformation claims)
+   */
+  citations: jsonb("citations"),
+  
+  /**
    * createdAt: When Interpretation Generated
    * 
    * Timestamp of AI analysis
