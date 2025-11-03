@@ -77,6 +77,29 @@ interface DreamContext {
 }
 
 /**
+ * Monitoring Metrics for LLM Performance Tracking
+ * 
+ * Captures operational metrics for each AI interpretation request.
+ * Critical for AIE8 Dimension 7 (Monitoring) - tracking system health,
+ * costs, and performance over time.
+ * 
+ * @property tokensUsed - Total tokens consumed (input + output)
+ * @property latencyMs - End-to-end response time in milliseconds
+ * @property costUsd - Calculated API cost in USD (based on token usage)
+ * @property modelVersion - Claude model identifier (e.g., "claude-3-5-sonnet-20241022")
+ * @property status - Request outcome: "success", "error", or "timeout"
+ * @property errorMessage - Error details if status !== "success" (null otherwise)
+ */
+interface InterpretationMetrics {
+  tokensUsed: number;
+  latencyMs: number;
+  costUsd: string;
+  modelVersion: string;
+  status: 'success' | 'error' | 'timeout';
+  errorMessage: string | null;
+}
+
+/**
  * Structured Interpretation Result
  * 
  * Standard response format ensuring consistent data structure across all dream analyses.
@@ -92,6 +115,7 @@ interface DreamContext {
  * @property themes - Overarching psychological themes (e.g., ["transformation", "control issues"])
  * @property confidence - AI's confidence score 0-100 (based on dream clarity/detail)
  * @property analysisType - Which analysis mode was used (for billing/features)
+ * @property metrics - Performance and cost tracking data (AIE8 Dimension 7)
  */
 interface InterpretationResult {
   interpretation: string;
@@ -100,6 +124,7 @@ interface InterpretationResult {
   themes: string[];
   confidence: number;
   analysisType: 'quick_insight' | 'deep_dive';
+  metrics: InterpretationMetrics;
 }
 
 /**
@@ -230,6 +255,12 @@ Provide your analysis in JSON format with these fields:
 }
 
 The confidence score should be 0-100 based on dream clarity and detail.`;
+
+  // Model version constant for metrics tracking
+  const MODEL_VERSION = 'claude-3-5-sonnet-20241022';
+  
+  // Start timing for latency measurement (AIE8 Dimension 7: Monitoring)
+  const startTime = Date.now();
 
   try {
     /**
@@ -449,6 +480,53 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
     }
 
     /**
+     * Metrics Calculation (AIE8 Dimension 7: Monitoring)
+     * 
+     * Extract operational metrics from API response for tracking:
+     * - Token usage (for cost calculation and optimization)
+     * - Latency (for performance monitoring)
+     * - Cost (for profitability analysis)
+     */
+    const endTime = Date.now();
+    const latencyMs = endTime - startTime;
+    
+    /**
+     * Token Usage Extraction
+     * 
+     * Anthropic API returns usage object with:
+     * - input_tokens: Prompt tokens (system + user message)
+     * - output_tokens: Response tokens (Claude's interpretation)
+     * 
+     * Total tokens = input + output (both count toward API cost)
+     */
+    const tokensUsed = (message.usage?.input_tokens || 0) + (message.usage?.output_tokens || 0);
+    
+    /**
+     * Cost Calculation (Claude 3.5 Sonnet Pricing - Oct 2024)
+     * 
+     * Input tokens:  $3.00 per 1M tokens = $0.000003 per token
+     * Output tokens: $15.00 per 1M tokens = $0.000015 per token
+     * 
+     * Formula:
+     * cost = (input_tokens × $0.000003) + (output_tokens × $0.000015)
+     * 
+     * Example (1500 tokens total: 500 input, 1000 output):
+     * cost = (500 × 0.000003) + (1000 × 0.000015) = $0.0165 (~1.7 cents)
+     * 
+     * Business Context:
+     * - Free tier avg cost: ~1-2 cents per interpretation
+     * - Premium tier avg cost: ~2-4 cents per interpretation
+     * - Monthly API budget: Track via SUM(costUsd) queries
+     * - Profitability threshold: $9.99/month ÷ avg interpretations/month
+     */
+    const inputTokens = message.usage?.input_tokens || 0;
+    const outputTokens = message.usage?.output_tokens || 0;
+    const costUsd = (
+      (inputTokens * 0.000003) + 
+      (outputTokens * 0.000015)
+    ).toFixed(6); // 6 decimal places for precision (sub-cent accuracy)
+
+    /**
      * Return Type Validation & Transformation
      * 
      * Defense-in-depth validation:
@@ -474,10 +552,30 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
       emotions: Array.isArray(parsed.emotions) ? parsed.emotions : [],
       themes: Array.isArray(parsed.themes) ? parsed.themes : [],
       confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 75,
-      analysisType
+      analysisType,
+      metrics: {
+        tokensUsed,
+        latencyMs,
+        costUsd,
+        modelVersion: MODEL_VERSION,
+        status: 'success' as const,
+        errorMessage: null
+      }
     };
 
   } catch (error: any) {
+    /**
+     * Error Metrics Tracking (AIE8 Dimension 7: Monitoring)
+     * 
+     * Even failed requests need metrics for monitoring:
+     * - Track error rate (success vs. failure ratio)
+     * - Measure time-to-failure (latency for errors)
+     * - Cost tracking (some errors still consume tokens)
+     * - Error pattern analysis (which errors are most common?)
+     */
+    const endTime = Date.now();
+    const latencyMs = endTime - startTime;
+    
     /**
      * Comprehensive Error Logging
      * 
@@ -497,6 +595,7 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
       message: error.message,
       status: error.status,
       type: error.type,
+      latencyMs, // Include latency in error logs
       fullError: error
     });
     
@@ -527,6 +626,9 @@ The confidence score should be 0-100 based on dream clarity and detail.`;
      * - 500: Anthropic service error (retry or fallback)
      * - 503: Service unavailable (maintenance mode)
      * - Network errors: Timeout, connection refused, DNS failure
+     * 
+     * Note: Error is rethrown but route handler will have access to metrics
+     * via the startTime captured before try block
      */
     throw new Error(`Failed to generate dream interpretation: ${error.message || 'Unknown error'}`);
   }
