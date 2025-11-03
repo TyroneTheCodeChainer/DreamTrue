@@ -40,7 +40,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { haptics } from "@/lib/haptics";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Home() {
   // Navigation hook (unused in current implementation, kept for future routing)
@@ -238,6 +238,10 @@ export default function Home() {
       
       // Tactile feedback: Success vibration pattern
       haptics.success();
+      
+      // Invalidate dreams cache to refresh Dreams page
+      queryClient.invalidateQueries({ queryKey: ["/api/dreams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dreams/stats"] });
       
       // Navigate to results page to display full interpretation
       setLocation("/results");
