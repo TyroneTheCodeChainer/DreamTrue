@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
+    "@chroma-core/default-embed": "^0.1.8",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@neondatabase/serverless": "^0.10.4",
@@ -47,6 +48,7 @@
     "@tanstack/react-query": "^5.60.5",
     "@types/memoizee": "^0.4.12",
     "chromadb": "^3.1.0",
+    "chromadb-default-embed": "^2.14.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
