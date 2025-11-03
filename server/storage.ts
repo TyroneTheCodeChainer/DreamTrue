@@ -40,6 +40,18 @@ export interface IStorage {
   logError(error: InsertError): Promise<ErrorLog>;
   getRecentErrors(limit?: number): Promise<ErrorLog[]>;
   getUserErrors(userId: string, limit?: number): Promise<ErrorLog[]>;
+  
+  // Monitoring metrics operations (AIE8 Dimension 7: Monitoring)
+  getMetricsAggregates(): Promise<{
+    totalInterpretations: number;
+    successfulInterpretations: number;
+    failedInterpretations: number;
+    successRate: number;
+    avgLatencyMs: number;
+    totalCostUsd: number;
+    avgCostUsd: number;
+    totalTokensUsed: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -175,6 +187,72 @@ export class DatabaseStorage implements IStorage {
       .where(eq(errors.userId, userId))
       .orderBy(desc(errors.createdAt))
       .limit(limit);
+  }
+
+  // Monitoring metrics operations (AIE8 Dimension 7: Monitoring)
+  
+  async getMetricsAggregates() {
+    /**
+     * Calculate Aggregated Monitoring Metrics
+     * 
+     * Purpose:
+     * Provides high-level system health metrics for monitoring dashboard.
+     * Helps product owners and engineers understand:
+     * - System reliability (success rate)
+     * - Performance (average latency)
+     * - Costs (total spend, per-interpretation cost)
+     * - Usage (total interpretations, token consumption)
+     * 
+     * Query Strategy:
+     * - Single query to fetch all interpretations
+     * - Client-side aggregation (more flexible than SQL aggregates)
+     * - Handles missing data gracefully (nullish coalescing)
+     * 
+     * Metrics Computed:
+     * - Total interpretations: Count of all records
+     * - Success rate: % of interpretations without errors
+     * - Average latency: Mean response time in milliseconds
+     * - Total cost: Sum of all interpretation costs
+     * - Average cost: Mean cost per interpretation
+     * - Total tokens: Sum of all token usage
+     * 
+     * Business Value:
+     * - Monitor AI service costs to optimize budget
+     * - Track success rate to detect service degradation
+     * - Measure latency to ensure good UX (target: <3s)
+     * - Understand token usage for capacity planning
+     * 
+     * Future Enhancements:
+     * - Time-based filtering (last 24h, 7d, 30d)
+     * - Per-user metrics (identify power users)
+     * - Per-model metrics (compare Claude vs GPT performance)
+     * - Percentile latencies (p50, p95, p99)
+     */
+    const allInterpretations = await db.select().from(interpretations);
+    
+    const totalInterpretations = allInterpretations.length;
+    const successfulInterpretations = allInterpretations.filter(i => i.status === 'success').length;
+    const failedInterpretations = allInterpretations.filter(i => i.status === 'error').length;
+    const successRate = totalInterpretations > 0 ? (successfulInterpretations / totalInterpretations) * 100 : 0;
+    
+    const totalLatencyMs = allInterpretations.reduce((sum, i) => sum + (i.latencyMs ?? 0), 0);
+    const avgLatencyMs = totalInterpretations > 0 ? totalLatencyMs / totalInterpretations : 0;
+    
+    const totalCostUsd = allInterpretations.reduce((sum, i) => sum + (i.costUsd ?? 0), 0);
+    const avgCostUsd = totalInterpretations > 0 ? totalCostUsd / totalInterpretations : 0;
+    
+    const totalTokensUsed = allInterpretations.reduce((sum, i) => sum + (i.tokensUsed ?? 0), 0);
+    
+    return {
+      totalInterpretations,
+      successfulInterpretations,
+      failedInterpretations,
+      successRate: Math.round(successRate * 100) / 100, // Round to 2 decimal places
+      avgLatencyMs: Math.round(avgLatencyMs),
+      totalCostUsd: Math.round(totalCostUsd * 10000) / 10000, // Round to 4 decimal places
+      avgCostUsd: Math.round(avgCostUsd * 10000) / 10000, // Round to 4 decimal places
+      totalTokensUsed,
+    };
   }
 }
 

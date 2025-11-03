@@ -1154,6 +1154,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * GET /api/monitoring/metrics
+   * 
+   * AIE8 Dimension 7: Monitoring - System Health Metrics
+   * 
+   * Returns aggregated metrics across all AI interpretations for system monitoring.
+   * This endpoint provides real-time insights into:
+   * - System reliability (success rate)
+   * - Performance (average latency)
+   * - Costs (total and per-interpretation spend)
+   * - Usage patterns (total interpretations, token consumption)
+   * 
+   * Authentication: Required (isAuthenticated middleware)
+   * 
+   * Response (200 OK):
+   * {
+   *   totalInterpretations: number,         // Total count of all interpretations
+   *   successfulInterpretations: number,    // Count of successful interpretations
+   *   failedInterpretations: number,        // Count of failed interpretations
+   *   successRate: number,                  // Percentage (0-100) of successful interpretations
+   *   avgLatencyMs: number,                 // Average response time in milliseconds
+   *   totalCostUsd: number,                 // Total cost in USD across all interpretations
+   *   avgCostUsd: number,                   // Average cost in USD per interpretation
+   *   totalTokensUsed: number               // Total tokens consumed across all interpretations
+   * }
+   * 
+   * Error Responses:
+   * - 401: Not authenticated
+   * - 500: Database error
+   * 
+   * Business Value:
+   * - Monitor AI service costs to optimize budget
+   * - Track success rate to detect service degradation
+   * - Measure latency to ensure good UX (target: <3s for quick insight)
+   * - Understand token usage for capacity planning
+   * - Identify cost optimization opportunities
+   * 
+   * Use Cases:
+   * - Dashboard for product owners to monitor system health
+   * - Engineering alerts on degraded performance
+   * - Cost tracking for business planning
+   * - Capacity planning based on usage trends
+   * 
+   * Future Enhancements:
+   * - Time-based filtering (last 24h, 7d, 30d)
+   * - Per-user metrics (identify power users)
+   * - Per-model metrics (compare Claude vs GPT performance)
+   * - Percentile latencies (p50, p95, p99)
+   */
+  app.get('/api/monitoring/metrics', isAuthenticated, async (req: any, res) => {
+    try {
+      const metrics = await storage.getMetricsAggregates();
+      res.json(metrics);
+    } catch (error) {
+      console.error('Error fetching monitoring metrics:', error);
+      res.status(500).json({ error: 'Failed to fetch monitoring metrics' });
+    }
+  });
+
+  /**
+   * GET /api/monitoring/errors
+   * 
+   * AIE8 Dimension 7: Monitoring - Error Debugging
+   * 
+   * Returns recent errors for debugging and monitoring purposes.
+   * This endpoint helps engineers:
+   * - Debug production issues
+   * - Identify error patterns
+   * - Track error rates over time
+   * - Understand which users are affected
+   * 
+   * Authentication: Required (isAuthenticated middleware)
+   * 
+   * Query Parameters:
+   * - limit?: number - Number of errors to return (default: 100, max: 1000)
+   * 
+   * Response (200 OK):
+   * [{
+   *   id: string,                           // Error ID
+   *   userId: string | null,                // User who experienced the error (null for unauthenticated)
+   *   errorType: string,                    // Error category (AuthenticationError, RateLimitError, etc.)
+   *   errorMessage: string,                 // Human-readable error message
+   *   stackTrace: string | null,            // Stack trace for debugging
+   *   context: object,                      // Additional context (endpoint, request details)
+   *   createdAt: Date                       // When the error occurred
+   * }]
+   * 
+   * Error Responses:
+   * - 401: Not authenticated
+   * - 400: Invalid limit parameter
+   * - 500: Database error
+   * 
+   * Business Value:
+   * - Rapid debugging of production issues
+   * - Pattern detection (which errors are most common?)
+   * - User impact tracking (which users experiencing issues?)
+   * - Service health monitoring (error rate trends)
+   * 
+   * Use Cases:
+   * - Engineering dashboard for error monitoring
+   * - Debugging specific user issues
+   * - Identifying systemic problems (e.g., Anthropic API outage)
+   * - Alerting on elevated error rates
+   * 
+   * Security Considerations:
+   * - Never log user PII (dream content, personal details)
+   * - Stack traces are safe (controlled by our code/Anthropic)
+   * - Context field should exclude sensitive data
+   * 
+   * Future Enhancements:
+   * - Filter by error type
+   * - Filter by user ID
+   * - Time-based filtering
+   * - Error grouping by similarity
+   */
+  app.get('/api/monitoring/errors', isAuthenticated, async (req: any, res) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 100, 1000);
+      
+      if (isNaN(limit) || limit < 1) {
+        return res.status(400).json({ error: 'Invalid limit parameter' });
+      }
+      
+      const errors = await storage.getRecentErrors(limit);
+      res.json(errors);
+    } catch (error) {
+      console.error('Error fetching monitoring errors:', error);
+      res.status(500).json({ error: 'Failed to fetch monitoring errors' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
