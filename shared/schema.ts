@@ -773,6 +773,164 @@ export const interpretations = pgTable("interpretations", {
    */
   confidence: integer("confidence"),
   
+  // ========== MONITORING FIELDS (AIE8 Dimension 7) ==========
+  // These fields track LLM performance, costs, and quality metrics
+  
+  /**
+   * tokensUsed: Total Tokens Consumed
+   * 
+   * INTEGER count of tokens (input + output)
+   * 
+   * What are tokens?
+   * - Tokens are the units AI models use to process text
+   * - ~4 characters = 1 token (approximate)
+   * - Both prompt (input) and response (output) count as tokens
+   * 
+   * Why track this?
+   * - Cost calculation (Claude pricing is per-token)
+   * - Performance optimization (fewer tokens = faster response)
+   * - Budget monitoring (prevent runaway costs)
+   * - Quality correlation (more tokens ≠ better analysis)
+   * 
+   * Typical values:
+   * - Quick Insight: 800-1500 tokens
+   * - Deep Dive: 1500-3000 tokens
+   * 
+   * Business value:
+   * - Calculate cost per interpretation
+   * - Identify expensive edge cases
+   * - Optimize prompt engineering (reduce unnecessary tokens)
+   */
+  tokensUsed: integer("tokens_used"),
+  
+  /**
+   * latencyMs: Response Time in Milliseconds
+   * 
+   * INTEGER milliseconds from request → response
+   * 
+   * Measures end-to-end API call duration:
+   * - Time to first token (TTFT)
+   * - Full completion time
+   * - Network roundtrip
+   * 
+   * Why track this?
+   * - User experience (3am users need fast feedback)
+   * - Performance degradation detection
+   * - API health monitoring
+   * - SLA compliance (we promise <30s responses)
+   * 
+   * Typical values:
+   * - Quick Insight: 5,000-15,000ms (5-15 seconds)
+   * - Deep Dive: 15,000-30,000ms (15-30 seconds)
+   * 
+   * Alerts:
+   * - >30s = Slow response (investigate)
+   * - >60s = Timeout warning (reduce token limit?)
+   */
+  latencyMs: integer("latency_ms"),
+  
+  /**
+   * costUsd: API Cost in USD
+   * 
+   * TEXT type for precise decimal values
+   * 
+   * Stores exact cost of this interpretation
+   * 
+   * Calculation (Claude 3.5 Sonnet pricing as of Oct 2024):
+   * - Input: $3.00 per 1M tokens
+   * - Output: $15.00 per 1M tokens
+   * 
+   * Example:
+   * - 500 input tokens = $0.0015
+   * - 800 output tokens = $0.012
+   * - Total cost = $0.0135 (~1.4 cents)
+   * 
+   * Why track this?
+   * - Per-interpretation profitability (vs. $9.99/month subscription)
+   * - Budget forecasting (monthly API spend)
+   * - Pricing optimization (are we losing money?)
+   * - Cost anomaly detection (unexpectedly expensive interpretations)
+   * 
+   * Business intelligence:
+   * - Average cost per user
+   * - Free tier cost burden
+   * - Premium tier profitability
+   * - Break-even analysis (how many interpretations before profitable?)
+   */
+  costUsd: text("cost_usd"),
+  
+  /**
+   * modelVersion: Claude Model Used
+   * 
+   * VARCHAR tracking which model generated this interpretation
+   * 
+   * Examples:
+   * - "claude-3-5-sonnet-20241022" (current production model)
+   * - "claude-3-opus-20240229" (if we upgrade)
+   * - "claude-3-haiku-20240307" (if we need cheaper/faster)
+   * 
+   * Why track this?
+   * - A/B testing different models
+   * - Quality comparison across versions
+   * - Migration tracking (old vs. new model performance)
+   * - Rollback capability (if new model underperforms)
+   * 
+   * Use cases:
+   * - "Did Sonnet 3.5 improve quality vs. Sonnet 3.0?"
+   * - "Is Opus worth the 5x cost increase?"
+   * - "Can Haiku handle Quick Insight mode?"
+   */
+  modelVersion: varchar("model_version"),
+  
+  /**
+   * status: Interpretation Status
+   * 
+   * VARCHAR enum: "success", "error", "timeout"
+   * 
+   * Tracks whether interpretation completed successfully
+   * 
+   * Status values:
+   * - "success": AI returned valid interpretation
+   * - "error": AI service failed (authentication, rate limit, parsing)
+   * - "timeout": Request exceeded timeout limit
+   * 
+   * Why track this?
+   * - Success rate monitoring (should be >95%)
+   * - Error pattern detection (specific failure modes)
+   * - SLA compliance (uptime tracking)
+   * - User experience impact (failed requests = frustrated users)
+   * 
+   * Metrics:
+   * - Success rate = (success / total) * 100
+   * - Error rate by type
+   * - Mean time between failures (MTBF)
+   */
+  status: varchar("status"),
+  
+  /**
+   * errorMessage: Error Details (if failed)
+   * 
+   * TEXT storing error information
+   * null if status = "success"
+   * 
+   * Contains:
+   * - Error type (e.g., "RateLimitError", "AuthenticationError")
+   * - Error message (e.g., "Rate limit exceeded")
+   * - Timestamp of error
+   * 
+   * Why store this?
+   * - Root cause analysis (what went wrong?)
+   * - Error categorization (authentication vs. rate limit vs. parsing)
+   * - Debug information (reproduce and fix issues)
+   * - User communication (explain what happened)
+   * 
+   * Privacy:
+   * - Never store user dream content in errors
+   * - Only store technical error details
+   * - Sanitize any PII before logging
+   */
+  errorMessage: text("error_message"),
+  
   /**
    * createdAt: When Interpretation Generated
    * 
