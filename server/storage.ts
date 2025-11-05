@@ -63,6 +63,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    // Standard upsert by ID (OIDC sub)
     const [user] = await db
       .insert(users)
       .values(userData)

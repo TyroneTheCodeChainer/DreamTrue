@@ -176,12 +176,12 @@ export const users = pgTable("users", {
   /**
    * email: User's Email Address
    * 
-   * .unique() means: No two users can have same email
-   * This prevents duplicate accounts and enables "forgot password" flows
+   * Note: Email is NOT unique because OIDC sub (ID) is the canonical identifier.
+   * Same email can be used with different OAuth providers (Google vs GitHub).
    * 
    * Example: "user@example.com"
    */
-  email: varchar("email").unique(),
+  email: varchar("email"),
   
   /**
    * firstName & lastName: User's Name
