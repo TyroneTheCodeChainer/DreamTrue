@@ -62,8 +62,15 @@ export class VectorStore {
   private collectionName = 'dream_research';
 
   constructor() {
-    // Initialize ChromaDB client (uses default localhost:8000)
-    this.client = new ChromaClient();
+    // Initialize ChromaDB client
+    // Connects to ChromaDB server (default: localhost:8000)
+    const chromaHost = process.env.CHROMA_HOST || 'localhost';
+    const chromaPort = process.env.CHROMA_PORT || '8000';
+    
+    this.client = new ChromaClient({
+      host: chromaHost,
+      port: chromaPort
+    });
   }
 
   /**
