@@ -22,6 +22,53 @@ const SubscribeForm = () => {
   const elements = useElements();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Check payment status on mount (after Stripe redirect)
+  useEffect(() => {
+    if (!stripe) return;
+
+    const clientSecret = new URLSearchParams(window.location.search).get(
+      'payment_intent_client_secret'
+    );
+
+    if (!clientSecret) return;
+
+    stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
+      if (!paymentIntent) return;
+
+      switch (paymentIntent.status) {
+        case 'succeeded':
+          toast({
+            title: "Welcome to Premium!",
+            description: "Your subscription is now active. Enjoy Deep Dive analysis and unlimited storage!",
+          });
+          setTimeout(() => setLocation("/"), 2000);
+          break;
+        case 'processing':
+          toast({
+            title: "Payment Processing",
+            description: "Your payment is being processed. We'll activate your premium account shortly.",
+          });
+          setTimeout(() => setLocation("/"), 2000);
+          break;
+        case 'requires_payment_method':
+          toast({
+            title: "Payment Failed",
+            description: "Your payment was not successful. Please try again.",
+            variant: "destructive",
+          });
+          break;
+        default:
+          toast({
+            title: "Something went wrong",
+            description: "Please try again or contact support.",
+            variant: "destructive",
+          });
+          break;
+      }
+    });
+  }, [stripe, toast, setLocation]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,10 +77,12 @@ const SubscribeForm = () => {
       return;
     }
 
+    setIsProcessing(true);
+
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: window.location.origin,
+        return_url: `${window.location.origin}/subscribe`,
       },
     });
 
@@ -43,12 +92,7 @@ const SubscribeForm = () => {
         description: error.message,
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Welcome to Premium!",
-        description: "Your subscription is now active. Enjoy Deep Dive analysis and dream storage!",
-      });
-      setLocation("/");
+      setIsProcessing(false);
     }
   };
 
@@ -57,12 +101,21 @@ const SubscribeForm = () => {
       <PaymentElement />
       <Button 
         type="submit" 
-        disabled={!stripe || !elements}
+        disabled={!stripe || !elements || isProcessing}
         className="w-full h-12 bg-gradient-to-r from-primary to-[#764ba2]"
         data-testid="button-confirm-payment"
       >
-        <Sparkles className="w-5 h-5 mr-2" />
-        Confirm Payment
+        {isProcessing ? (
+          <>
+            <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2" />
+            Processing...
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-5 h-5 mr-2" />
+            Confirm Payment
+          </>
+        )}
       </Button>
     </form>
   );
