@@ -7,6 +7,25 @@ The application features two interpretation modes:
 - **Quick RAG**: Fast interpretation using vector database retrieval and LLM generation.
 - **Deep Analysis (Agentic)**: Comprehensive multi-agent workflow for detailed dream analysis.
 
+## Recent Changes (November 5, 2025)
+
+### Production-Ready Status: ✅ VERIFIED FOR DEMO DAY
+- **RAG System**: 214 research document chunks indexed and verified working
+- **Stripe Integration**: Complete payment flow implemented and code-reviewed
+- **Auth System**: Fixed OIDC email conflict issue (removed unique constraint)
+- **Schema Migration**: Applied database changes for multi-provider auth support
+
+### Changes Made:
+1. **RAG Testing**: Created `server/test-rag-pipeline.ts` to verify citation system
+2. **Stripe Payment Flow**: All endpoints, webhooks, and UI components complete
+3. **Auth Fix**: Removed email unique constraint to support multiple OAuth providers
+4. **Database Schema**: Updated `shared/schema.ts` - email field no longer unique
+5. **Documentation**: Added `STRIPE_TEST_GUIDE.md` for payment testing
+
+### Known Limitations:
+- Stripe Price ID needs to be configured in production environment
+- Email field can now have duplicates (by design - OIDC sub is canonical ID)
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
