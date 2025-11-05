@@ -517,10 +517,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If user already has a subscription, return it
       if (user.stripeSubscriptionId) {
-        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        const subscription = await stripe.subscriptions.retrieve(
+          user.stripeSubscriptionId,
+          { expand: ['latest_invoice.payment_intent'] }
+        );
+        
+        const latestInvoice = subscription.latest_invoice as any;
+        let clientSecret = latestInvoice?.payment_intent?.client_secret;
+        
+        console.log("♻️ Returning existing subscription:", {
+          subscriptionId: subscription.id,
+          clientSecret: clientSecret ? "✓ Present" : "❌ Missing",
+          invoiceStatus: latestInvoice?.status,
+          paymentIntentStatus: latestInvoice?.payment_intent?.status,
+        });
+        
         return res.json({
           subscriptionId: subscription.id,
-          clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
+          clientSecret,
         });
       }
 
@@ -589,6 +603,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .where(eq(users.id, userId))
         .returning();
+
+      console.log("📋 Subscription created:", {
+        subscriptionId: subscription.id,
+        clientSecret: clientSecret ? "✓ Present" : "❌ Missing",
+        invoiceStatus: latestInvoice?.status,
+        paymentIntentStatus: (latestInvoice as any)?.payment_intent?.status,
+      });
+
+      // Final check: if still no clientSecret, something went wrong
+      if (!clientSecret) {
+        console.error("⚠️ No client secret available for subscription:", subscription.id);
+        return res.status(500).json({
+          message: "Unable to set up payment. Please try again or contact support.",
+          errorType: "no_client_secret",
+          devMessage: "Subscription created but no payment intent client_secret available"
+        });
+      }
 
       res.json({
         subscriptionId: subscription.id,
