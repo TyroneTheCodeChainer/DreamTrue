@@ -84,7 +84,11 @@ export default function Home() {
    * - showBreathing: Controls BreathingExercise modal (nightmare support)
    */
   const [dreamText, setDreamText] = useState("");
-  const [context, setContext] = useState<{ stress?: string; emotion?: string }>({});
+  const [context, setContext] = useState<{ 
+    stress?: string; 
+    emotions?: string[];
+    additionalContext?: string;
+  }>({});
   const [analysisType, setAnalysisType] = useState<"quick_insight" | "deep_dive">("quick_insight");
   const [showVoice, setShowVoice] = useState(false);
   const [showContextChips, setShowContextChips] = useState(false);
@@ -93,20 +97,26 @@ export default function Home() {
   /**
    * Context Selection Handler
    * 
-   * Updates context object with user-selected stress level or emotion.
+   * Updates context object with user-selected stress level, emotions, or additional text.
    * Uses functional state update to preserve other context fields.
    * 
-   * @param type - 'stress' or 'emotion' (determines which field to update)
-   * @param value - Selected value from ContextChips component
+   * @param type - 'stress', 'emotions', or 'additionalContext'
+   * @param value - Selected value or comma-separated emotions from ContextChips
    * 
    * Example flow:
-   * 1. User clicks "High" stress chip
-   * 2. Calls handleContextSelect('stress', 'high')
-   * 3. Updates context to { ...prev, stress: 'high' }
-   * 4. Context sent to AI with dream text
+   * 1. User clicks "High" stress chip → { stress: 'high' }
+   * 2. User selects multiple emotions → { emotions: ['anxious', 'confused'] }
+   * 3. User types additional context → { additionalContext: 'Had a big exam today' }
+   * 4. All context sent to AI with dream text
    */
-  const handleContextSelect = (type: "stress" | "emotion", value: string) => {
-    setContext((prev) => ({ ...prev, [type]: value }));
+  const handleContextSelect = (type: "stress" | "emotions" | "additionalContext", value: string) => {
+    if (type === "emotions") {
+      // Handle comma-separated emotions from multi-select
+      const emotionArray = value ? value.split(',') : [];
+      setContext((prev) => ({ ...prev, emotions: emotionArray }));
+    } else {
+      setContext((prev) => ({ ...prev, [type]: value }));
+    }
   };
 
   /**
