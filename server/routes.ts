@@ -532,10 +532,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentIntentStatus: latestInvoice?.payment_intent?.status,
         });
         
-        return res.json({
-          subscriptionId: subscription.id,
-          clientSecret,
-        });
+        // If existing subscription has no client secret, clear it and create new one
+        if (!clientSecret) {
+          console.warn("⚠️ Existing subscription missing payment intent - clearing and creating new one");
+          await db
+            .update(users)
+            .set({
+              stripeCustomerId: null,
+              stripeSubscriptionId: null,
+              subscriptionStatus: null,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, userId));
+          // Don't return - fall through to create new subscription
+        } else {
+          return res.json({
+            subscriptionId: subscription.id,
+            clientSecret,
+          });
+        }
       }
 
       // Create Stripe customer
