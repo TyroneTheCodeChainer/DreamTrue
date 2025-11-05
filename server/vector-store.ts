@@ -1,7 +1,7 @@
 /**
  * Vector Store for Dream Research Citations
  * 
- * This module manages a ChromaDB vector database containing research papers
+ * This module manages a vector database containing research papers
  * on dream analysis, psychology, and neuroscience. It enables RAG (Retrieval-
  * Augmented Generation) by finding relevant research context before AI interpretation.
  * 
@@ -9,10 +9,11 @@
  * - Semantic search over research paper chunks
  * - Metadata filtering (category, validation level)
  * - Citation-ready results with source information
- * - Persistent storage (survives server restarts)
+ * - Persistent file-based storage (survives server restarts)
  * 
  * Architecture:
- * - Uses ChromaDB TypeScript client
+ * - Uses Vectra (pure TypeScript, embedded, no server needed)
+ * - Uses @xenova/transformers for local embeddings (no API calls)
  * - Stores document chunks with metadata (source, category, page)
  * - Returns top-k most relevant chunks for dream interpretation context
  * 
@@ -22,7 +23,13 @@
  * - Provides traceable citations (PubMed, arXiv, APA PsycNet)
  */
 
-import { ChromaClient, Collection } from 'chromadb';
+import { LocalIndex } from 'vectra';
+import { pipeline } from '@xenova/transformers';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Document chunk with metadata for citation
@@ -53,52 +60,89 @@ export interface SearchResult {
 /**
  * Vector Store Class
  * 
- * Manages ChromaDB collection for research documents.
+ * Manages vector database for research documents using Vectra.
  * Singleton pattern ensures one database connection.
+ * 
+ * **Why Vectra over ChromaDB:**
+ * - No server required (embedded, file-based)
+ * - Pure TypeScript (easier deployment)
+ * - Local embeddings (no API calls for embedding)
+ * - Meets bootcamp RAG requirements
  */
 export class VectorStore {
-  private client: ChromaClient;
-  private collection: Collection | null = null;
-  private collectionName = 'dream_research';
+  private index: LocalIndex | null = null;
+  private embedder: any = null;
+  private indexPath: string;
+  private initialized: boolean = false;
 
   constructor() {
-    // Initialize ChromaDB client
-    // Connects to ChromaDB server (default: localhost:8000)
-    const chromaHost = process.env.CHROMA_HOST || 'localhost';
-    const chromaPort = process.env.CHROMA_PORT || '8000';
-    
-    this.client = new ChromaClient({
-      host: chromaHost,
-      port: chromaPort
-    });
+    // Store vector index in ./vector_db directory
+    this.indexPath = path.join(process.cwd(), 'vector_db');
   }
 
   /**
-   * Initialize or get existing collection
+   * Initialize vector index and embedding model
    * 
-   * Collections in ChromaDB are like tables - they group related documents.
-   * We use one collection for all dream research papers.
+   * Uses Vectra for file-based storage and Xenova transformers
+   * for local embedding generation (no API calls needed).
    * 
    * Design Note: Called lazily on first use (not in constructor) to avoid
-   * blocking server startup if ChromaDB is slow.
+   * blocking server startup if model loading is slow.
    */
   async initializeCollection(): Promise<void> {
+    if (this.initialized) {
+      return; // Already initialized
+    }
+
     try {
-      // Try to get existing collection first
-      this.collection = await this.client.getOrCreateCollection({
-        name: this.collectionName,
-        metadata: {
-          description: 'Research papers on dream analysis and psychology',
-          'hnsw:space': 'cosine', // Cosine similarity for semantic search
-        },
-      });
+      console.log('Initializing vector store...');
       
-      const count = await this.collection.count();
-      console.log(`Vector store initialized: ${count} documents in collection "${this.collectionName}"`);
+      // Initialize Vectra index (file-based, no server needed)
+      this.index = new LocalIndex(this.indexPath);
+      
+      // Create index if it doesn't exist
+      if (!(await this.index.isIndexCreated())) {
+        console.log('Creating new vector index...');
+        await this.index.createIndex();
+      }
+
+      // Initialize embedding model (runs locally, no API needed)
+      // Using all-MiniLM-L6-v2: fast, 384-dim embeddings, perfect for semantic search
+      console.log('Loading embedding model (this may take a moment on first run)...');
+      this.embedder = await pipeline(
+        'feature-extraction',
+        'Xenova/all-MiniLM-L6-v2'
+      );
+
+      const itemCount = await this.index.listItems();
+      console.log(`✅ Vector store initialized: ${itemCount.length} documents indexed`);
+      
+      this.initialized = true;
     } catch (error) {
-      console.error('Failed to initialize vector store:', error);
+      console.error('❌ Failed to initialize vector store:', error);
       throw new Error('Vector database unavailable - citations will not work');
     }
+  }
+
+  /**
+   * Generate embedding for text using local model
+   * 
+   * @param text - Text to embed
+   * @returns Embedding vector (384 dimensions)
+   */
+  private async generateEmbedding(text: string): Promise<number[]> {
+    if (!this.embedder) {
+      throw new Error('Embedding model not initialized');
+    }
+
+    // Generate embedding using Xenova transformers
+    const output = await this.embedder(text, {
+      pooling: 'mean',
+      normalize: true,
+    });
+
+    // Convert to array
+    return Array.from(output.data);
   }
 
   /**
@@ -110,7 +154,7 @@ export class VectorStore {
    * @param documents - Array of document chunks with metadata
    */
   async addDocuments(documents: DocumentChunk[]): Promise<void> {
-    if (!this.collection) {
+    if (!this.index) {
       await this.initializeCollection();
     }
 
@@ -119,29 +163,43 @@ export class VectorStore {
       return;
     }
 
-    // Prepare data for ChromaDB
-    const ids: string[] = [];
-    const texts: string[] = [];
-    const metadatas: any[] = [];
+    console.log(`Embedding ${documents.length} document chunks...`);
 
-    documents.forEach((doc, index) => {
-      // Generate unique ID: source_timestamp_index
-      const timestamp = Date.now();
-      const id = `${doc.metadata.source}_${timestamp}_${index}`;
+    // Process documents in batches to avoid overwhelming the model
+    const batchSize = 10;
+    let addedCount = 0;
+
+    for (let i = 0; i < documents.length; i += batchSize) {
+      const batch = documents.slice(i, i + batchSize);
       
-      ids.push(id);
-      texts.push(doc.content);
-      metadatas.push(doc.metadata);
-    });
+      for (const doc of batch) {
+        try {
+          // Generate embedding for document content
+          const embedding = await this.generateEmbedding(doc.content);
 
-    // Add to collection (ChromaDB handles embedding generation)
-    await this.collection!.add({
-      ids,
-      documents: texts,
-      metadatas,
-    });
+          // Generate unique ID
+          const id = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    console.log(`Added ${documents.length} document chunks to vector store`);
+          // Add to index with metadata
+          await this.index!.insertItem({
+            id,
+            vector: embedding,
+            metadata: {
+              content: doc.content,
+              ...doc.metadata,
+            },
+          });
+
+          addedCount++;
+        } catch (error) {
+          console.error(`Failed to add document: ${error}`);
+        }
+      }
+
+      console.log(`Progress: ${Math.min(i + batchSize, documents.length)}/${documents.length} documents processed`);
+    }
+
+    console.log(`✅ Added ${addedCount} document chunks to vector store`);
   }
 
   /**
@@ -160,45 +218,59 @@ export class VectorStore {
     nResults: number = 5,
     categoryFilter?: string
   ): Promise<SearchResult[]> {
-    if (!this.collection) {
+    if (!this.index) {
       await this.initializeCollection();
     }
 
-    // Build metadata filter if category specified
-    const where = categoryFilter ? { category: categoryFilter } : undefined;
+    try {
+      // Generate embedding for query
+      const queryEmbedding = await this.generateEmbedding(query);
 
-    // Perform semantic search
-    const results = await this.collection!.query({
-      queryTexts: [query],
-      nResults,
-      where,
-    });
+      // Search vector index
+      const results = await this.index!.queryItems(queryEmbedding, nResults * 2); // Get more to filter
 
-    // Format results with citations
-    const searchResults: SearchResult[] = [];
+      // Filter by category if specified
+      let filteredResults = results;
+      if (categoryFilter) {
+        filteredResults = results.filter(
+          (r: any) => r.item.metadata.category === categoryFilter
+        );
+      }
 
-    if (results.ids && results.ids[0]) {
-      for (let i = 0; i < results.ids[0].length; i++) {
-        const metadata = results.metadatas?.[0]?.[i] as DocumentChunk['metadata'];
-        const distance = results.distances?.[0]?.[i] || 1;
-        const content = results.documents?.[0]?.[i] || '';
+      // Take top nResults after filtering
+      filteredResults = filteredResults.slice(0, nResults);
 
-        // Convert distance to relevance score (0-1, higher = better)
-        const relevanceScore = Math.max(0, 1 - distance);
+      // Format results with citations
+      const searchResults: SearchResult[] = filteredResults.map((result: any) => {
+        const metadata = result.item.metadata;
+        
+        // Vectra returns score (higher = more similar, typically 0-1)
+        const relevanceScore = result.score;
 
         // Format citation (APA style)
         const citation = this.formatCitation(metadata);
 
-        searchResults.push({
-          content,
-          metadata,
+        return {
+          content: metadata.content,
+          metadata: {
+            source: metadata.source,
+            category: metadata.category,
+            page: metadata.page,
+            author: metadata.author,
+            year: metadata.year,
+            doi: metadata.doi,
+            validation: metadata.validation,
+          },
           relevanceScore,
           citation,
-        });
-      }
-    }
+        };
+      });
 
-    return searchResults;
+      return searchResults;
+    } catch (error) {
+      console.error('Search failed:', error);
+      return [];
+    }
   }
 
   /**
@@ -211,7 +283,7 @@ export class VectorStore {
    * @param metadata - Document metadata
    * @returns APA-formatted citation string
    */
-  private formatCitation(metadata: DocumentChunk['metadata']): string {
+  private formatCitation(metadata: any): string {
     const { author, year, source, doi } = metadata;
 
     // Basic format: Author (Year). Title.
@@ -237,10 +309,11 @@ export class VectorStore {
    * Get document count (for debugging)
    */
   async getDocumentCount(): Promise<number> {
-    if (!this.collection) {
+    if (!this.index) {
       await this.initializeCollection();
     }
-    return await this.collection!.count();
+    const items = await this.index!.listItems();
+    return items.length;
   }
 
   /**
@@ -248,12 +321,12 @@ export class VectorStore {
    * Only for testing/development - not exposed via API
    */
   async clearCollection(): Promise<void> {
-    if (!this.collection) {
+    if (!this.index) {
       await this.initializeCollection();
     }
-    await this.client.deleteCollection({ name: this.collectionName });
-    console.log('Vector store collection cleared');
-    this.collection = null;
+    await this.index!.deleteIndex();
+    await this.index!.createIndex();
+    console.log('✅ Vector store collection cleared');
   }
 }
 

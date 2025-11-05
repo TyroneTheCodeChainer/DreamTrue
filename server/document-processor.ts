@@ -24,11 +24,7 @@
 
 import { readFileSync } from 'fs';
 import { DocumentChunk } from './vector-store';
-import { createRequire } from 'module';
-
-// pdf-parse is a CommonJS module, need createRequire for ES modules
-const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+import { PDFParse } from 'pdf-parse';
 
 /**
  * Processed document ready for vector store
@@ -68,16 +64,18 @@ export class DocumentProcessor {
       // Read PDF file as buffer
       const dataBuffer = readFileSync(pdfPath);
       
-      // Parse PDF and extract text
-      const data = await pdfParse(dataBuffer);
+      // Parse PDF using pdf-parse v2 API
+      const parser = new PDFParse({ data: dataBuffer });
+      const result = await parser.getText(); // Extract all text
+      await parser.destroy(); // Clean up resources
       
       // Clean up text (remove excessive whitespace)
-      const cleanedText = data.text
+      const cleanedText = result.text
         .replace(/\r\n/g, '\n')  // Normalize line endings
         .replace(/\n{3,}/g, '\n\n')  // Max 2 consecutive newlines
         .trim();
       
-      console.log(`Extracted ${cleanedText.length} characters from ${pdfPath} (${data.numpages} pages)`);
+      console.log(`Extracted ${cleanedText.length} characters from ${pdfPath} (${result.total} pages)`);
       
       return cleanedText;
     } catch (error: any) {
