@@ -226,8 +226,8 @@ export class VectorStore {
       // Generate embedding for query
       const queryEmbedding = await this.generateEmbedding(query);
 
-      // Search vector index
-      const results = await this.index!.queryItems(queryEmbedding, nResults * 2); // Get more to filter
+      // Search vector index (vectra needs: vector, originalQuery, topK)
+      const results = await this.index!.queryItems(queryEmbedding, query, nResults * 2); // Get more to filter
 
       // Filter by category if specified
       let filteredResults = results;
