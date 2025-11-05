@@ -545,22 +545,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Extract client secret from payment intent
-      let clientSecret = (subscription.latest_invoice as any)?.payment_intent?.client_secret;
+      // Note: latest_invoice is already expanded to full object (see expand option above)
+      const latestInvoice = subscription.latest_invoice as any;
+      let clientSecret = latestInvoice?.payment_intent?.client_secret;
       
-      // If no client secret, manually create a payment intent for the invoice
-      if (!clientSecret && subscription.latest_invoice) {
-        const invoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
-        if (invoice && !(invoice as any).payment_intent) {
+      // If no client secret but we have an invoice, try to get/create payment intent
+      if (!clientSecret && latestInvoice) {
+        // Check if invoice is already an object (expanded) or just an ID string
+        const invoiceObj = typeof latestInvoice === 'string' 
+          ? await stripe.invoices.retrieve(latestInvoice)
+          : latestInvoice;
+          
+        if (invoiceObj && !invoiceObj.payment_intent) {
+          // Invoice exists but has no payment intent - create one
           const paymentIntent = await stripe.paymentIntents.create({
-            amount: invoice.amount_due,
+            amount: invoiceObj.amount_due,
             currency: 'usd',
             customer: customer.id,
             metadata: {
               subscription_id: subscription.id,
-              invoice_id: invoice.id,
+              invoice_id: invoiceObj.id,
             },
           });
           clientSecret = paymentIntent.client_secret;
+        } else if (invoiceObj?.payment_intent) {
+          // Payment intent exists but wasn't expanded - retrieve it
+          const pi = typeof invoiceObj.payment_intent === 'string'
+            ? await stripe.paymentIntents.retrieve(invoiceObj.payment_intent)
+            : invoiceObj.payment_intent;
+          clientSecret = pi.client_secret;
         }
       }
 
