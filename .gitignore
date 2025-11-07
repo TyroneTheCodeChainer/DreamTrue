@@ -9,6 +9,9 @@ yarn-error.log*
 .env.local
 .env.production
 .env.*.local
+attached_assets/**/*.env
+attached_assets/.env*
+attached_assets/**/.*env*
 
 # Vector database (regenerate with ingest script)
 vector_db/

@@ -1,0 +1,35 @@
+\[\]\[\]\[\]~/workspace\[\]$ \[\]git push https://$CODECHAINER_DREAMTRUE@github.com/TyroneTheCodeChainer/DreamTrue.git main --force
+Enumerating objects: 1056, done.
+Counting objects: 100% (1056/1056), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (1039/1039), done.
+Writing objects:  21% (222/1056), 3.72 MiB | 7.41 MWriting objects:  21% (225/1056), 3.72 MiB | 7.41 MWriting objects:  22% (233/1056), 9.55 MiB | 6.25 MWriting objects:  22% (236/1056), 12.41 MiB | 6.12 Writing objects:  23% (243/1056), 15.23 MiB | 6.02 Writing objects:  23% (245/1056), 18.06 MiB | 5.96 Writing objects:  23% (253/1056), 23.78 MiB | 5.89 Writing objects:  24% (254/1056), 23.78 MiB | 5.89 Writing objects:  24% (263/1056), 26.60 MiB | 5.84 Writing objects:  25% (264/1056), 29.50 MiB | 5.67 Writing objects:  25% (273/1056), 32.37 MiB | 5.69 Writing objects:  26% (275/1056), 35.09 MiB | 5.65 Writing objects:  26% (284/1056), 38.04 MiB | 5.66 Writing objects:  27% (286/1056), 40.86 MiB | 5.65 Writing objects:  28% (296/1056), 43.77 MiB | 5.67 Writing objects:  28% (304/1056), 52.30 MiB | 5.69 Writing objects:  29% (307/1056), 52.30 MiB | 5.69 Writing objects:  29% (313/1056), 55.13 MiB | 5.67 Writing objects:  30% (317/1056), 57.97 MiB | 5.67 Writing objects:  30% (322/1056), 60.80 MiB | 5.69 Writing objects:  31% (328/1056), 66.51 MiB | 5.68 Writing objects:  32% (338/1056), 66.51 MiB | 5.68 Writing objects:  33% (349/1056), 66.51 MiB | 5.68 Writing objects:  34% (360/1056), 66.51 MiB | 5.68 Writing objects:  35% (370/1056), 66.51 MiB | 5.68 Writing objects:  36% (381/1056), 66.51 MiB | 5.68 Writing objects:  37% (391/1056), 66.51 MiB | 5.68 Writing objects:  38% (402/1056), 66.51 MiB | 5.68 Writing objects:  39% (412/1056), 66.51 MiB | 5.68 Writing objects:  40% (423/1056), 66.51 MiB | 5.68 Writing objects:  41% (433/1056), 66.51 MiB | 5.68 Writing objects:  42% (444/1056), 66.51 MiB | 5.68 Writing objects:  43% (455/1056), 66.51 MiB | 5.68 Writing objects:  44% (465/1056), 66.51 MiB | 5.68 Writing objects:  45% (476/1056), 66.51 MiB | 5.68 Writing objects:  46% (486/1056), 66.51 MiB | 5.68 Writing objects:  47% (497/1056), 66.51 MiB | 5.68 Writing objects:  48% (507/1056), 66.51 MiB | 5.68 Writing objects:  49% (518/1056), 66.51 MiB | 5.68 Writing objects:  50% (528/1056), 66.51 MiB | 5.68 Writing objects:  51% (539/1056), 66.51 MiB | 5.68 Writing objects:  52% (550/1056), 66.51 MiB | 5.68 Writing objects:  53% (560/1056), 66.51 MiB | 5.68 Writing objects:  54% (571/1056), 66.51 MiB | 5.68 Writing objects:  55% (581/1056), 66.51 MiB | 5.68 Writing objects:  56% (592/1056), 66.51 MiB | 5.68 Writing objects:  57% (602/1056), 66.51 MiB | 5.68 Writing objects:  58% (613/1056), 66.51 MiB | 5.68 Writing objects:  59% (624/1056), 66.51 MiB | 5.68 Writing objects:  60% (634/1056), 66.51 MiB | 5.68 Writing objects:  61% (645/1056), 66.51 MiB | 5.68 Writing objects:  62% (655/1056), 66.51 MiB | 5.68 Writing objects:  63% (666/1056), 66.51 MiB | 5.68 Writing objects:  64% (676/1056), 66.51 MiB | 5.68 Writing objects:  65% (687/1056), 66.51 MiB | 5.68 Writing objects:  66% (697/1056), 66.51 MiB | 5.68 Writing objects:  67% (708/1056), 66.51 MiB | 5.68 Writing objects:  68% (719/1056), 66.51 MiB | 5.68 Writing objects:  69% (729/1056), 66.51 MiB | 5.68 Writing objects:  70% (740/1056), 66.51 MiB | 5.68 Writing objects:  71% (750/1056), 66.51 MiB | 5.68 Writing objects:  72% (761/1056), 66.51 MiB | 5.68 Writing objects:  73% (771/1056), 66.51 MiB | 5.68 Writing objects:  74% (782/1056), 66.51 MiB | 5.68 Writing objects:  75% (792/1056), 66.51 MiB | 5.68 Writing objects:  76% (803/1056), 66.51 MiB | 5.68 Writing objects:  77% (814/1056), 66.51 MiB | 5.68 Writing objects:  78% (824/1056), 66.51 MiB | 5.68 Writing objects:  79% (835/1056), 66.51 MiB | 5.68 Writing objects:  80% (845/1056), 66.51 MiB | 5.68 Writing objects:  81% (856/1056), 66.51 MiB | 5.68 Writing objects:  82% (866/1056), 66.51 MiB | 5.68 Writing objects:  83% (877/1056), 66.51 MiB | 5.68 Writing objects:  84% (888/1056), 66.51 MiB | 5.68 Writing objects:  85% (898/1056), 66.51 MiB | 5.68 Writing objects:  86% (909/1056), 66.51 MiB | 5.68 Writing objects:  87% (919/1056), 66.51 MiB | 5.68 Writing objects:  88% (930/1056), 66.51 MiB | 5.68 Writing objects:  89% (940/1056), 66.51 MiB | 5.68 Writing objects:  90% (951/1056), 66.51 MiB | 5.68 Writing objects:  91% (961/1056), 66.51 MiB | 5.68 Writing objects:  92% (972/1056), 66.51 MiB | 5.68 Writing objects:  93% (983/1056), 66.51 MiB | 5.68 Writing objects:  94% (993/1056), 66.51 MiB | 5.68 Writing objects:  95% (1004/1056), 66.51 MiB | 5.68Writing objects:  96% (1014/1056), 66.51 MiB | 5.68Writing objects:  97% (1025/1056), 66.51 MiB | 5.68Writing objects:  98% (1035/1056), 66.51 MiB | 5.68Writing objects:  99% (1046/1056), 66.51 MiB | 5.68Writing objects: 100% (1056/1056), 66.51 MiB | 5.68Writing objects: 100% (1056/1056), 68.51 MiB | 5.74 MiB/s, done.
+Total 1056 (delta 638), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (638/638), done.
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: 
+remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote: 
+remote:     - Push cannot contain secrets
+remote: 
+remote:     
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:     
+remote:     
+remote:       —— Anthropic API Key —————————————————————————————————
+remote:        locations:
+remote:          - commit: ff15a59f15caeef3dfb663bbeb9882cdff6cb232
+remote:            path: attached_assets/_1760607549718.env:2
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/TyroneTheCodeChainer/DreamTrue/security/secret-scanning/unblock-secret/3589NNGuBvSBKrlvmWxzEOhsM1z
+remote:     
+remote: 
+remote: 
+To https://github.com/TyroneTheCodeChainer/DreamTrue.git
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/TyroneTheCodeChainer/DreamTrue.git'
+\[\]\[\]\[\]~/workspace\[\]$ \[\]
