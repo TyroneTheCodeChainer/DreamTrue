@@ -1,6 +1,48 @@
-node_modules
-dist
-.DS_Store
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables (CRITICAL - Never commit secrets!)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Vector database (regenerate with ingest script)
+vector_db/
+
+# Build output
+dist/
+build/
+.next/
 server/public
-vite.config.ts.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Replit specific
+.replit
+replit.nix
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
 *.tar.gz
+.cache/
+
+# Config backups
+vite.config.ts.*

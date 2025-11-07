@@ -102,30 +102,34 @@ echo "${YELLOW}Setting up main branch...${NC}"
 git branch -M main
 echo "${GREEN}✓ Main branch set${NC}"
 
-# Step 6: Instructions for GitHub remote
+# Step 6: Add remote and push to GitHub
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "${YELLOW}Next Steps:${NC}"
+echo "${YELLOW}Pushing to GitHub...${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "1. Go to GitHub: https://github.com/new"
+
+# Check if remote already exists
+if git remote | grep -q "origin"; then
+    echo "${YELLOW}Remote 'origin' already exists, updating URL...${NC}"
+    git remote set-url origin https://github.com/TyroneTheCodeChainer/DreamTrue.git
+else
+    echo "${YELLOW}Adding remote 'origin'...${NC}"
+    git remote add origin https://github.com/TyroneTheCodeChainer/DreamTrue.git
+fi
+
+echo "${GREEN}✓ Remote configured${NC}"
 echo ""
-echo "2. Create a new repository with these settings:"
-echo "   - Repository name: dreamtrue"
-echo "   - Description: AI-powered dream interpretation with RAG citations"
-echo "   - Visibility: Public ✓"
-echo "   - Initialize: Leave unchecked (we already have code)"
-echo ""
-echo "3. After creating the repo, run these commands:"
-echo ""
-echo "${GREEN}   git remote add origin https://github.com/YOUR_USERNAME/dreamtrue.git${NC}"
-echo "${GREEN}   git push -u origin main${NC}"
-echo ""
-echo "4. Replace YOUR_USERNAME with your actual GitHub username"
+echo "${YELLOW}Pushing to GitHub...${NC}"
+
+# Push to GitHub
+git push -u origin main
+
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "${GREEN}✅ Successfully pushed to GitHub!${NC}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "${GREEN}✅ Repository ready to push!${NC}"
-echo ""
-echo "Your GitHub URL will be: https://github.com/YOUR_USERNAME/dreamtrue"
+echo "Your repository is now live at:"
+echo "${GREEN}https://github.com/TyroneTheCodeChainer/DreamTrue${NC}"
 echo ""

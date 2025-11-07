@@ -515,14 +515,24 @@ All code includes extensive comments explaining:
 
 ## 📄 License
 
-MIT License - See LICENSE file for details
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+
+**What this means:**
+- ✅ You can use, modify, and distribute this code
+- ✅ Any modifications must be released under AGPL-3.0
+- ✅ If you run this as a network service (SaaS), you must make your source code available
+- ⚠️ Commercial use requires open-sourcing your entire application
+
+**For commercial licensing** without open-source requirements, contact: tyrone.aiengineer@gmail.com
+
+See [LICENSE](LICENSE) file for full terms.
 
 ---
 
 ## 👨‍💻 Author
 
 **Tyrone Feldman**
-- LinkedIn: [Your LinkedIn URL]
+- GitHub: [TyroneTheCodeChainer](https://github.com/TyroneTheCodeChainer/DreamTrue)
 - Email: tyrone.aiengineer@gmail.com
 - AI Makerspace Bootcamp: Cohort 8
 
