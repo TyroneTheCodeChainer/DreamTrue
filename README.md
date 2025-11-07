@@ -244,18 +244,26 @@ npm run db:push
 
 ### 5. Ingest Research Papers (RAG Setup)
 
+**Important**: Research PDFs should be placed in the `attached_assets/` directory before running ingestion.
+
 ```bash
 # Process PDF research papers and populate vector database
 npx tsx server/scripts/ingest-research.ts
 ```
 
 This will:
-- Read PDFs from `research_papers/` directory
-- Extract and chunk text
-- Generate embeddings
-- Store in `vector_db/` directory
+- Read PDFs from `attached_assets/` directory (or custom path specified in script)
+- Extract and chunk text using pdf-parse
+- Generate embeddings using all-MiniLM-L6-v2 model
+- Store in `vector_db/` directory (file-based, persistent)
 
 **Expected output**: `✅ Added 214 document chunks to vector store`
+
+**Custom Papers**: To use your own research papers:
+1. Place PDF files in `attached_assets/` directory
+2. Update file paths in `server/scripts/ingest-research.ts` if needed
+3. Run the ingestion script
+4. Verify chunks were added: `npx tsx server/test-rag-pipeline.ts`
 
 ### 6. Start Development Server
 

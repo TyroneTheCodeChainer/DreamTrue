@@ -335,11 +335,17 @@ Questions?
 ### Timing Breakdown (5 minutes total)
 - Intro (30s): Slide 1-2
 - Problem/Solution (1min): Slide 2-3
-- RAG System (1.5min): Slide 4-5 ⭐ **Focus here - bootcamp requirement**
+- **RAG System (1.5min): Slide 4-5** ⭐ **MUST-COVER - bootcamp requirement**
 - Live Demo (1min): Slide 6
 - Tech Stack & Business (1min): Slide 7-8
 - Metrics & Challenges (30s): Slide 9-10
 - Wrap-up (30s): Slide 11-12
+
+**If Running Over Time** (Priority order):
+1. **KEEP**: Slides 1-6 (Intro, Problem, RAG, Demo) - These are essential
+2. **SHORTEN**: Slides 7-8 (Tech Stack & Business) - Can mention briefly
+3. **SKIP IF NEEDED**: Slides 9-11 (Metrics, Challenges, Roadmap) - Nice to have
+4. **ALWAYS END WITH**: Slide 12 (CTA with QR code)
 
 ### What to Emphasize
 1. **RAG System** (most important for bootcamp) - Show you understand retrieval, embeddings, and augmented generation
